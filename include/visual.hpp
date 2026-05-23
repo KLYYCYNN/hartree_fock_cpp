@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include "rapidcsv.h"
+#include "types.hpp"
 
 inline
 void printMatrix(const std::vector<std::vector<double>>& mat) {
@@ -64,3 +65,10 @@ void printVector(const std::vector<T>& vec, const std::string& sep = " ") {
     // Print the final element followed by a newline
     std::cout << vec.back() << "\n";
 }
+
+inline
+std::vector<double> density_gpu(const std::vector<basis_function>& basis,
+                                const std::vector<double>& density_matrix,
+                                const std::vector<vector3>& r);
+
+                                

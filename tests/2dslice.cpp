@@ -2,9 +2,9 @@
 
 int main(){
 
-    std::string save_path = "/home/jc6224/hf/data/test1";
+    std::string save_path = "/home/jc6224/hf_cpp/data/H2O";
     std::string basis_file = save_path + "/basis.csv";
-    std::string param_path = "/home/jc6224/hf/basis_sets";
+    std::string param_path = "/home/jc6224/hf_cpp/basis";
 
     std::vector<basis_function> basis 
     = basis_recon(basis_file, param_path,"cc-pVTZ");
@@ -18,13 +18,11 @@ int main(){
     std::vector<double> C_matrix = coeff_file.GetColumn
                                    <double>("coefficient_matrix");
 
-    vector3 origin = position_vector(0.0, 0.0, 0.0);
-
     square surface;
-    surface.center = origin;
-    surface.A = position_vector(0.0, 1.0, 0.0);
-    surface.B = position_vector(0.0, 0.0, 1.0);
-    surface.L = 3.0;
+    surface.center = position_vector(0.5, 0.0, 0.0);
+    surface.A = position_vector(0.5, 1.0, 0.0);
+    surface.B = position_vector(1.0, 0.0, 0.0);
+    surface.L = 7.0;
 
-    rhf_2d_homo_lumo(save_path, "homo_lumo", basis, C_matrix, 2, surface, 1024);
+    density2d(save_path, "density_slice", basis, P_matrix, surface, 1024);
 }

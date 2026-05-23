@@ -1,5 +1,7 @@
+data/
 build/
 *.o
 *.out
 *.cube
 .vscode/
+scripts/shell/

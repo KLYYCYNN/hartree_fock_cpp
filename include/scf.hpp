@@ -76,13 +76,13 @@ double repulsion_energy(const std::vector<atom>& molecule){
 }
 
 
-std::string
+std::string 
 formatTimeC20(std::chrono::high_resolution_clock::time_point tp) {
     // Cast high_resolution_clock to system_clock to get calendar time
     auto sys_tp = std::chrono::clock_cast<std::chrono::system_clock>(tp);
     
-    // %R = 24-hour time (HH:MM), %d/%m/%y = dd/mm/yy
-    return std::format("{:%R %d/%m/%y}", sys_tp);
+    // %T = 24-hour time with seconds (HH:MM:SS), %d/%m/%y = dd/mm/yy
+    return std::format("{:%T %d/%m/%y}", sys_tp);
 }
 
 

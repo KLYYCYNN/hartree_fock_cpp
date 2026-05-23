@@ -4,8 +4,8 @@
 
 int main() {
 
-    std::string param_path = "/home/jc6224/hf/basis_sets";
-    std::string save_path = "/home/jc6224/hf/data";
+    std::string param_path = "/home/jc6224/hf_cpp/basis";
+    std::string save_path = "/home/jc6224/hf_cpp/data";
     std::string compute_ERI = "CPU";
     std::string basis_set = "cc-pVTZ";
 

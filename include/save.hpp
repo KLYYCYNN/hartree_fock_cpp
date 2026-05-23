@@ -9,6 +9,7 @@
 
 
 //save matrices to csv, each nested subvector is a column.
+inline
 void save_csv(const std::vector<std::vector<double>>& data,
               std::vector<std::string> column_headers,
               std::string fileName) {
@@ -26,6 +27,7 @@ void save_csv(const std::vector<std::vector<double>>& data,
     doc.Save(fileName);
 }
 
+inline
 std::string formatElementCounts(const std::vector<std::string>& elements){
     if (elements.empty()) return "";
 
@@ -59,6 +61,7 @@ std::string formatElementCounts(const std::vector<std::string>& elements){
     return result;
 }
 
+inline
 void create_folder(const std::string& folder_path) {
     try {
         // create_directories creates parent folders automatically if missing
@@ -76,6 +79,7 @@ void create_folder(const std::string& folder_path) {
 }
 
 
+inline
 void save_basis(const basis_info& info, std::string folder)
 {
 
@@ -116,6 +120,7 @@ void save_basis(const basis_info& info, std::string folder)
 }
 
 
+inline
 void save_metadata(std::string folder,
                    scf_data data, 
                    std::string method, 
@@ -160,6 +165,7 @@ void save_metadata(std::string folder,
 }
 
 
+inline
 void save_geometry(std::vector<std::pair<std::string, vector3>> config,
                    std::string folder)
 {
@@ -193,6 +199,7 @@ void save_geometry(std::vector<std::pair<std::string, vector3>> config,
     file.Save(path);
 }
 
+inline
 void save_scf_data(std::string path,
                    std::string folder_name,
                    scf_data data,

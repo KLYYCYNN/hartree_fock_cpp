@@ -9,7 +9,6 @@
 #include "visual.hpp"
 #include "save.hpp"
 
-
 double function_eval(const basis_function& function,
                      const vector3& position)
 {
@@ -43,7 +42,6 @@ double function_eval(const basis_function& function,
     return val;
 
 }
-
 
 std::vector<double> electron_density(const std::vector<basis_function>& basis,
                                      const std::vector<double>& density_matrix,
@@ -123,6 +121,7 @@ std::pair<int, int> homo_lumo_indices(
     return {homo, lumo};
 }
 
+
 std::pair<std::vector<double>, std::vector<double>> 
 homo_lumo_wf(const std::vector<basis_function>& basis,
              const std::vector<double>& coeff_mat,
@@ -172,73 +171,13 @@ homo_lumo_wf(const std::vector<basis_function>& basis,
 }
 
 
-cube_data density3d(const std::vector<basis_function>& basis,
-                    const std::vector<double>& density_matrix,
-                    const vector3& center,
-                    const double L,
-                    const int resolution)
+std::vector<vector3> box_points(const vector3& center,
+                               const double& L,
+                               const int res)
 {
-
-    if (resolution < 2){
-    throw std::runtime_error("resolution must be at least 2");
-    }
-
-    std::vector<double> x = 
-    linspace(center.x - L / 2, center.x + L / 2, resolution);
-
-    std::vector<double> y = 
-    linspace(center.y - L / 2, center.y + L / 2, resolution);
-
-    std::vector<double> z = 
-    linspace(center.z - L / 2, center.z + L / 2, resolution);
-
-    int n_total = resolution * resolution * resolution;
-    std::vector<vector3> positions(n_total);
-
-    for (int i = 0; i < resolution; ++ i){
-        for (int j = 0; j < resolution; ++j){
-            for (int k = 0; k < resolution; ++k){
-
-                positions[index3d(i, j, k, resolution)]
-                = position_vector(x[i], y[j], z[k]);
-
-            }
-        }
-    }
-    
-    cube_data output;
-    output.field =
-    electron_density(basis, density_matrix, positions);
-
-    output.origin = position_vector(center.x - L / 2,
-                    center.y - L / 2, center.z - L / 2);
-    output.dx = L / (resolution - 1);
-    output.res = resolution;
-
-    return output;
-}
-
-std::pair<cube_data, cube_data>
-rhf_3d_homo_lumo(const std::vector<basis_function>& basis,
-                 const std::vector<double>& coeff_mat,
-                 const int n_electron,
-                 const vector3& center,
-                 const double L,
-                 const int res)
-{
-    int K = basis.size();
-
-    if (coeff_mat.size() != K * K){
-        throw std::runtime_error
-        ("Coefficient matrix dimension doesn't match basis size.");
-    }
 
     if (res < 2){
         throw std::runtime_error("resolution must be at least 2");
-    }
-
-    if (n_electron % 2 != 0){
-        throw std::runtime_error("Odd electron number for RHF.");
     }
 
     std::vector<double> x = 
@@ -262,6 +201,58 @@ rhf_3d_homo_lumo(const std::vector<basis_function>& basis,
             }
         }
     }
+
+    return positions;
+
+}
+
+
+cube_data density3d(const std::vector<basis_function>& basis,
+                    const std::vector<double>& density_matrix,
+                    const vector3& center,
+                    const double L,
+                    const int resolution)
+{
+
+    std::vector<vector3> positions = box_points(center, L, resolution);
+    
+    cube_data output;
+    output.field =
+    electron_density(basis, density_matrix, positions);
+
+    output.origin = position_vector(center.x - L / 2,
+                    center.y - L / 2, center.z - L / 2);
+    output.dx = L / (resolution - 1);
+    output.res = resolution;
+
+    return output;
+}
+
+
+
+std::pair<cube_data, cube_data>
+rhf_3d_homo_lumo(const std::vector<basis_function>& basis,
+                 const std::vector<double>& coeff_mat,
+                 const int n_electron,
+                 const vector3& center,
+                 const double L,
+                 const int res)
+{
+    int K = basis.size();
+
+    if (coeff_mat.size() != K * K){
+        throw std::runtime_error
+        ("Coefficient matrix dimension doesn't match basis size.");
+    }
+
+
+
+    if (n_electron % 2 != 0){
+        throw std::runtime_error("Odd electron number for RHF.");
+    }
+
+
+    std::vector<vector3> positions = box_points(center, L, res);
 
     std::pair<int, int> indices = {n_electron / 2 - 1, n_electron / 2};
 
@@ -287,6 +278,7 @@ rhf_3d_homo_lumo(const std::vector<basis_function>& basis,
 
     return {homo, lumo};
 }
+
 
 
 std::pair<cube_data, cube_data>
@@ -317,28 +309,7 @@ uhf_3d_homo_lumo(const std::vector<basis_function>& basis,
     std::pair<int, int>
     indices = homo_lumo_indices(mo_energies, occupations);
 
-    std::vector<double> x = 
-    linspace(center.x - L / 2, center.x + L / 2, res);
-
-    std::vector<double> y = 
-    linspace(center.y - L / 2, center.y + L / 2, res);
-
-    std::vector<double> z = 
-    linspace(center.z - L / 2, center.z + L / 2, res);
-
-    int n_total = res * res * res;
-    std::vector<vector3> positions(n_total);
-
-    for (int i = 0; i < res; ++ i){
-        for (int j = 0; j < res; ++j){
-            for (int k = 0; k < res; ++k){
-
-                positions[index3d(i, j, k, res)] =
-                position_vector(x[i], y[j], z[k]);
-
-                }
-            }
-        }
+    std::vector<vector3> positions = box_points(center, L, res);
 
     std::pair<std::vector<double>, std::vector<double>>
     homo_lumo = homo_lumo_wf(basis, coeff_mat, indices, positions);
@@ -362,6 +333,7 @@ uhf_3d_homo_lumo(const std::vector<basis_function>& basis,
 
     return {homo, lumo};
 }
+
 
 
 void write_cube_file(const std::string& filename,
@@ -440,6 +412,7 @@ void write_cube_file(const std::string& filename,
 }
 
 
+
 void save_matrix_csv(const std::string& file_name,
                      const std::vector<double>& matrix,
                      int rows, int cols)
@@ -472,6 +445,7 @@ void save_matrix_csv(const std::string& file_name,
 
     file.close();
 }
+
 
 
 void density2d(const std::string& path,
@@ -515,31 +489,13 @@ void density2d(const std::string& path,
     std::string folder = path + "/" + folder_name;
     create_folder(folder);
     
-    std::string csv_name = folder + "/2dslice.csv";
+    std::string csv_name = folder + "/density2d.csv";
     save_matrix_csv(csv_name, rho_r, res, res);
 
-    std::string vside = 
-    "(" + std::to_string(e2.x) + 
-    ", " + std::to_string(e2.y) +
-    ", " + std::to_string(e2.z) + ")";
-
-    std::string hside = 
-    "(" + std::to_string(e1.x) + 
-    ", " + std::to_string(e1.y) +
-    ", " + std::to_string(e1.z) + ")";
-
-    std::string centre = 
-    "(" + std::to_string(C.x) + 
-    ", " + std::to_string(C.y) +
-    ", " + std::to_string(C.z) + ")";
-
-    std::string fileName = folder + "/square_params.json";
+    std::string fileName = folder + "/square.json";
 
     nlohmann::ordered_json data;
-    data["centre"] = centre;
     data["side_length"] = L;
-    data["h_side"] = hside;
-    data["v_side"] = vside;
     data["resolution"] = std::to_string(res) + " X " +
                          std::to_string(res);
 
@@ -551,7 +507,18 @@ void density2d(const std::string& path,
         std::cout << "metadata writing failed." << std::endl;
     }
 
+    std::vector<double> hside = {e2.x, e2.y, e2.z};
+    std::vector<double> vside = {e1.x, e1.y, e1.z};
+    std::vector<double> centre = {C.x, C.y, C.z};
+
+    std::vector<std::string> 
+    headers = {"hside_direc", "vside_direc", "center"};
+
+    save_csv({hside, vside, centre}, headers, folder + "/square.csv");
 }
+
+
+
 
 void rhf_2d_homo_lumo(const std::string& path,
                       const std::string& folder_name,
@@ -600,31 +567,13 @@ void rhf_2d_homo_lumo(const std::string& path,
     std::string folder = path + "/" + folder_name;
     create_folder(folder);
     
-    save_matrix_csv(folder + "/2dhomo.csv", homo_lumo.first, res, res);
-    save_matrix_csv(folder + "/2dlumo.csv", homo_lumo.second, res, res);
+    save_matrix_csv(folder + "/homo2d.csv", homo_lumo.first, res, res);
+    save_matrix_csv(folder + "/lumo2d.csv", homo_lumo.second, res, res);
 
-    std::string vside = 
-    "(" + std::to_string(e2.x) + 
-    ", " + std::to_string(e2.y) +
-    ", " + std::to_string(e2.z) + ")";
-
-    std::string hside = 
-    "(" + std::to_string(e1.x) + 
-    ", " + std::to_string(e1.y) +
-    ", " + std::to_string(e1.z) + ")";
-
-    std::string centre = 
-    "(" + std::to_string(C.x) + 
-    ", " + std::to_string(C.y) +
-    ", " + std::to_string(C.z) + ")";
-
-    std::string fileName = folder + "/square_params.json";
+    std::string fileName = folder + "/square.json";
 
     nlohmann::ordered_json data;
-    data["centre"] = centre;
     data["side_length"] = L;
-    data["h_side"] = hside;
-    data["v_side"] = vside;
     data["resolution"] = std::to_string(res) + " X " +
                          std::to_string(res);
 
@@ -636,7 +585,17 @@ void rhf_2d_homo_lumo(const std::string& path,
         std::cout << "metadata writing failed." << std::endl;
     }
 
+    std::vector<double> hside = {e2.x, e2.y, e2.z};
+    std::vector<double> vside = {e1.x, e1.y, e1.z};
+    std::vector<double> centre = {C.x, C.y, C.z};
+
+    std::vector<std::string> 
+    headers = {"hside_direc", "vside_direc", "center"};
+
+    save_csv({hside, vside, centre}, headers, folder + "/square.csv");
+
 }
+
 
 void uhf_2d_homo_lumo(const std::string& path,
                       const std::string& folder_name,
@@ -683,33 +642,15 @@ void uhf_2d_homo_lumo(const std::string& path,
     std::string folder = path + "/" + folder_name;
     create_folder(folder);
     
-    save_matrix_csv(folder + "/2dhomo.csv", homo_lumo.first, res, res);
-    save_matrix_csv(folder + "/2dlumo.csv", homo_lumo.second, res, res);
-
-    std::string vside = 
-    "(" + std::to_string(e2.x) + 
-    ", " + std::to_string(e2.y) +
-    ", " + std::to_string(e2.z) + ")";
-
-    std::string hside = 
-    "(" + std::to_string(e1.x) + 
-    ", " + std::to_string(e1.y) +
-    ", " + std::to_string(e1.z) + ")";
-
-    std::string centre = 
-    "(" + std::to_string(C.x) + 
-    ", " + std::to_string(C.y) +
-    ", " + std::to_string(C.z) + ")";
-
-    std::string fileName = folder + "/square_params.json";
+    save_matrix_csv(folder + "/homo2d.csv", homo_lumo.first, res, res);
+    save_matrix_csv(folder + "/lumo2d.csv", homo_lumo.second, res, res);
 
     nlohmann::ordered_json data;
-    data["centre"] = centre;
     data["side_length"] = L;
-    data["h_side"] = hside;
-    data["v_side"] = vside;
     data["resolution"] = std::to_string(res) + " X " +
                          std::to_string(res);
+
+    std::string fileName = folder + "/square/json";
 
     std::ofstream file(fileName);
     if (file.is_open()){
@@ -719,4 +660,34 @@ void uhf_2d_homo_lumo(const std::string& path,
         std::cout << "metadata writing failed." << std::endl;
     }
 
+    std::vector<double> hside = {e2.x, e2.y, e2.z};
+    std::vector<double> vside = {e1.x, e1.y, e1.z};
+    std::vector<double> centre = {C.x, C.y, C.z};
+
+    std::vector<std::string> 
+    headers = {"hside_direc", "vside_direc", "center"};
+
+    save_csv({hside, vside, centre}, headers, folder + "/square.csv");
+
+}
+
+
+cube_data density3d_gpu(const std::vector<basis_function>& basis,
+                        const std::vector<double>& density_matrix,
+                        const vector3& center,
+                        const double L,
+                        const int resolution)
+{
+
+    std::vector<vector3> positions = box_points(center, L, resolution);
+    
+    cube_data output;
+    output.field = density_gpu(basis, density_matrix, positions);
+
+    output.origin = position_vector(center.x - L / 2,
+                    center.y - L / 2, center.z - L / 2);
+    output.dx = L / (resolution - 1);
+    output.res = resolution;
+
+    return output;
 }
