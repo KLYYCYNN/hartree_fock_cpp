@@ -1,0 +1,1844 @@
+{
+  "H": [
+    {
+      "input_L": "S",
+      "n_exponents": 5,
+      "n_coeff_columns": 3,
+      "produced": [
+        {
+          "L": "S",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 0,
+          "n_primitives": 1
+        },
+        {
+          "L": "S",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 1,
+          "n_primitives": 5
+        },
+        {
+          "L": "S",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 2,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "P",
+      "n_exponents": 2,
+      "n_coeff_columns": 2,
+      "produced": [
+        {
+          "L": "P",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 3,
+          "n_primitives": 1
+        },
+        {
+          "L": "P",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 4,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "D",
+      "n_exponents": 1,
+      "n_coeff_columns": 1,
+      "produced": [
+        {
+          "L": "D",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 5,
+          "n_primitives": 1
+        }
+      ]
+    }
+  ],
+  "He": [
+    {
+      "input_L": "S",
+      "n_exponents": 6,
+      "n_coeff_columns": 3,
+      "produced": [
+        {
+          "L": "S",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 0,
+          "n_primitives": 1
+        },
+        {
+          "L": "S",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 1,
+          "n_primitives": 6
+        },
+        {
+          "L": "S",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 2,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "P",
+      "n_exponents": 2,
+      "n_coeff_columns": 2,
+      "produced": [
+        {
+          "L": "P",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 3,
+          "n_primitives": 1
+        },
+        {
+          "L": "P",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 4,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "D",
+      "n_exponents": 1,
+      "n_coeff_columns": 1,
+      "produced": [
+        {
+          "L": "D",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 5,
+          "n_primitives": 1
+        }
+      ]
+    }
+  ],
+  "Li": [
+    {
+      "input_L": "S",
+      "n_exponents": 11,
+      "n_coeff_columns": 4,
+      "produced": [
+        {
+          "L": "S",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 0,
+          "n_primitives": 11
+        },
+        {
+          "L": "S",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 1,
+          "n_primitives": 1
+        },
+        {
+          "L": "S",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 2,
+          "n_primitives": 11
+        },
+        {
+          "L": "S",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 3,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "P",
+      "n_exponents": 5,
+      "n_coeff_columns": 3,
+      "produced": [
+        {
+          "L": "P",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 4,
+          "n_primitives": 1
+        },
+        {
+          "L": "P",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 5,
+          "n_primitives": 5
+        },
+        {
+          "L": "P",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 6,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "D",
+      "n_exponents": 2,
+      "n_coeff_columns": 2,
+      "produced": [
+        {
+          "L": "D",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 7,
+          "n_primitives": 1
+        },
+        {
+          "L": "D",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 8,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "F",
+      "n_exponents": 1,
+      "n_coeff_columns": 1,
+      "produced": [
+        {
+          "L": "F",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 9,
+          "n_primitives": 1
+        }
+      ]
+    }
+  ],
+  "Be": [
+    {
+      "input_L": "S",
+      "n_exponents": 11,
+      "n_coeff_columns": 4,
+      "produced": [
+        {
+          "L": "S",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 0,
+          "n_primitives": 11
+        },
+        {
+          "L": "S",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 1,
+          "n_primitives": 1
+        },
+        {
+          "L": "S",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 2,
+          "n_primitives": 11
+        },
+        {
+          "L": "S",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 3,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "P",
+      "n_exponents": 5,
+      "n_coeff_columns": 3,
+      "produced": [
+        {
+          "L": "P",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 4,
+          "n_primitives": 1
+        },
+        {
+          "L": "P",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 5,
+          "n_primitives": 5
+        },
+        {
+          "L": "P",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 6,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "D",
+      "n_exponents": 2,
+      "n_coeff_columns": 2,
+      "produced": [
+        {
+          "L": "D",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 7,
+          "n_primitives": 1
+        },
+        {
+          "L": "D",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 8,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "F",
+      "n_exponents": 1,
+      "n_coeff_columns": 1,
+      "produced": [
+        {
+          "L": "F",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 9,
+          "n_primitives": 1
+        }
+      ]
+    }
+  ],
+  "B": [
+    {
+      "input_L": "S",
+      "n_exponents": 10,
+      "n_coeff_columns": 4,
+      "produced": [
+        {
+          "L": "S",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 0,
+          "n_primitives": 10
+        },
+        {
+          "L": "S",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 1,
+          "n_primitives": 1
+        },
+        {
+          "L": "S",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 2,
+          "n_primitives": 10
+        },
+        {
+          "L": "S",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 3,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "P",
+      "n_exponents": 5,
+      "n_coeff_columns": 3,
+      "produced": [
+        {
+          "L": "P",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 4,
+          "n_primitives": 1
+        },
+        {
+          "L": "P",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 5,
+          "n_primitives": 5
+        },
+        {
+          "L": "P",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 6,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "D",
+      "n_exponents": 2,
+      "n_coeff_columns": 2,
+      "produced": [
+        {
+          "L": "D",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 7,
+          "n_primitives": 1
+        },
+        {
+          "L": "D",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 8,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "F",
+      "n_exponents": 1,
+      "n_coeff_columns": 1,
+      "produced": [
+        {
+          "L": "F",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 9,
+          "n_primitives": 1
+        }
+      ]
+    }
+  ],
+  "C": [
+    {
+      "input_L": "S",
+      "n_exponents": 10,
+      "n_coeff_columns": 4,
+      "produced": [
+        {
+          "L": "S",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 0,
+          "n_primitives": 10
+        },
+        {
+          "L": "S",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 1,
+          "n_primitives": 1
+        },
+        {
+          "L": "S",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 2,
+          "n_primitives": 10
+        },
+        {
+          "L": "S",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 3,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "P",
+      "n_exponents": 5,
+      "n_coeff_columns": 3,
+      "produced": [
+        {
+          "L": "P",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 4,
+          "n_primitives": 1
+        },
+        {
+          "L": "P",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 5,
+          "n_primitives": 5
+        },
+        {
+          "L": "P",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 6,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "D",
+      "n_exponents": 2,
+      "n_coeff_columns": 2,
+      "produced": [
+        {
+          "L": "D",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 7,
+          "n_primitives": 1
+        },
+        {
+          "L": "D",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 8,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "F",
+      "n_exponents": 1,
+      "n_coeff_columns": 1,
+      "produced": [
+        {
+          "L": "F",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 9,
+          "n_primitives": 1
+        }
+      ]
+    }
+  ],
+  "N": [
+    {
+      "input_L": "S",
+      "n_exponents": 10,
+      "n_coeff_columns": 4,
+      "produced": [
+        {
+          "L": "S",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 0,
+          "n_primitives": 10
+        },
+        {
+          "L": "S",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 1,
+          "n_primitives": 1
+        },
+        {
+          "L": "S",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 2,
+          "n_primitives": 10
+        },
+        {
+          "L": "S",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 3,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "P",
+      "n_exponents": 5,
+      "n_coeff_columns": 3,
+      "produced": [
+        {
+          "L": "P",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 4,
+          "n_primitives": 1
+        },
+        {
+          "L": "P",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 5,
+          "n_primitives": 5
+        },
+        {
+          "L": "P",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 6,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "D",
+      "n_exponents": 2,
+      "n_coeff_columns": 2,
+      "produced": [
+        {
+          "L": "D",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 7,
+          "n_primitives": 1
+        },
+        {
+          "L": "D",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 8,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "F",
+      "n_exponents": 1,
+      "n_coeff_columns": 1,
+      "produced": [
+        {
+          "L": "F",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 9,
+          "n_primitives": 1
+        }
+      ]
+    }
+  ],
+  "O": [
+    {
+      "input_L": "S",
+      "n_exponents": 10,
+      "n_coeff_columns": 4,
+      "produced": [
+        {
+          "L": "S",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 0,
+          "n_primitives": 10
+        },
+        {
+          "L": "S",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 1,
+          "n_primitives": 1
+        },
+        {
+          "L": "S",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 2,
+          "n_primitives": 10
+        },
+        {
+          "L": "S",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 3,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "P",
+      "n_exponents": 5,
+      "n_coeff_columns": 3,
+      "produced": [
+        {
+          "L": "P",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 4,
+          "n_primitives": 1
+        },
+        {
+          "L": "P",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 5,
+          "n_primitives": 5
+        },
+        {
+          "L": "P",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 6,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "D",
+      "n_exponents": 2,
+      "n_coeff_columns": 2,
+      "produced": [
+        {
+          "L": "D",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 7,
+          "n_primitives": 1
+        },
+        {
+          "L": "D",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 8,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "F",
+      "n_exponents": 1,
+      "n_coeff_columns": 1,
+      "produced": [
+        {
+          "L": "F",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 9,
+          "n_primitives": 1
+        }
+      ]
+    }
+  ],
+  "F": [
+    {
+      "input_L": "S",
+      "n_exponents": 10,
+      "n_coeff_columns": 4,
+      "produced": [
+        {
+          "L": "S",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 0,
+          "n_primitives": 10
+        },
+        {
+          "L": "S",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 1,
+          "n_primitives": 1
+        },
+        {
+          "L": "S",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 2,
+          "n_primitives": 10
+        },
+        {
+          "L": "S",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 3,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "P",
+      "n_exponents": 5,
+      "n_coeff_columns": 3,
+      "produced": [
+        {
+          "L": "P",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 4,
+          "n_primitives": 1
+        },
+        {
+          "L": "P",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 5,
+          "n_primitives": 5
+        },
+        {
+          "L": "P",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 6,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "D",
+      "n_exponents": 2,
+      "n_coeff_columns": 2,
+      "produced": [
+        {
+          "L": "D",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 7,
+          "n_primitives": 1
+        },
+        {
+          "L": "D",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 8,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "F",
+      "n_exponents": 1,
+      "n_coeff_columns": 1,
+      "produced": [
+        {
+          "L": "F",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 9,
+          "n_primitives": 1
+        }
+      ]
+    }
+  ],
+  "Ne": [
+    {
+      "input_L": "S",
+      "n_exponents": 10,
+      "n_coeff_columns": 4,
+      "produced": [
+        {
+          "L": "S",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 0,
+          "n_primitives": 10
+        },
+        {
+          "L": "S",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 1,
+          "n_primitives": 1
+        },
+        {
+          "L": "S",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 2,
+          "n_primitives": 10
+        },
+        {
+          "L": "S",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 3,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "P",
+      "n_exponents": 5,
+      "n_coeff_columns": 3,
+      "produced": [
+        {
+          "L": "P",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 4,
+          "n_primitives": 1
+        },
+        {
+          "L": "P",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 5,
+          "n_primitives": 5
+        },
+        {
+          "L": "P",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 6,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "D",
+      "n_exponents": 2,
+      "n_coeff_columns": 2,
+      "produced": [
+        {
+          "L": "D",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 7,
+          "n_primitives": 1
+        },
+        {
+          "L": "D",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 8,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "F",
+      "n_exponents": 1,
+      "n_coeff_columns": 1,
+      "produced": [
+        {
+          "L": "F",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 9,
+          "n_primitives": 1
+        }
+      ]
+    }
+  ],
+  "Na": [
+    {
+      "input_L": "S",
+      "n_exponents": 16,
+      "n_coeff_columns": 5,
+      "produced": [
+        {
+          "L": "S",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 0,
+          "n_primitives": 16
+        },
+        {
+          "L": "S",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 1,
+          "n_primitives": 16
+        },
+        {
+          "L": "S",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 2,
+          "n_primitives": 1
+        },
+        {
+          "L": "S",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 3,
+          "n_primitives": 16
+        },
+        {
+          "L": "S",
+          "column": 4,
+          "status": "kept",
+          "shell_id": 4,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "P",
+      "n_exponents": 10,
+      "n_coeff_columns": 4,
+      "produced": [
+        {
+          "L": "P",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 5,
+          "n_primitives": 10
+        },
+        {
+          "L": "P",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 6,
+          "n_primitives": 1
+        },
+        {
+          "L": "P",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 7,
+          "n_primitives": 10
+        },
+        {
+          "L": "P",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 8,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "D",
+      "n_exponents": 2,
+      "n_coeff_columns": 2,
+      "produced": [
+        {
+          "L": "D",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 9,
+          "n_primitives": 1
+        },
+        {
+          "L": "D",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 10,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "F",
+      "n_exponents": 1,
+      "n_coeff_columns": 1,
+      "produced": [
+        {
+          "L": "F",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 11,
+          "n_primitives": 1
+        }
+      ]
+    }
+  ],
+  "Mg": [
+    {
+      "input_L": "S",
+      "n_exponents": 15,
+      "n_coeff_columns": 5,
+      "produced": [
+        {
+          "L": "S",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 0,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 1,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 2,
+          "n_primitives": 1
+        },
+        {
+          "L": "S",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 3,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 4,
+          "status": "kept",
+          "shell_id": 4,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "P",
+      "n_exponents": 10,
+      "n_coeff_columns": 4,
+      "produced": [
+        {
+          "L": "P",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 5,
+          "n_primitives": 10
+        },
+        {
+          "L": "P",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 6,
+          "n_primitives": 1
+        },
+        {
+          "L": "P",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 7,
+          "n_primitives": 10
+        },
+        {
+          "L": "P",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 8,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "D",
+      "n_exponents": 2,
+      "n_coeff_columns": 2,
+      "produced": [
+        {
+          "L": "D",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 9,
+          "n_primitives": 1
+        },
+        {
+          "L": "D",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 10,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "F",
+      "n_exponents": 1,
+      "n_coeff_columns": 1,
+      "produced": [
+        {
+          "L": "F",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 11,
+          "n_primitives": 1
+        }
+      ]
+    }
+  ],
+  "Al": [
+    {
+      "input_L": "S",
+      "n_exponents": 15,
+      "n_coeff_columns": 5,
+      "produced": [
+        {
+          "L": "S",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 0,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 1,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 2,
+          "n_primitives": 1
+        },
+        {
+          "L": "S",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 3,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 4,
+          "status": "kept",
+          "shell_id": 4,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "P",
+      "n_exponents": 9,
+      "n_coeff_columns": 4,
+      "produced": [
+        {
+          "L": "P",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 5,
+          "n_primitives": 9
+        },
+        {
+          "L": "P",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 6,
+          "n_primitives": 1
+        },
+        {
+          "L": "P",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 7,
+          "n_primitives": 9
+        },
+        {
+          "L": "P",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 8,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "D",
+      "n_exponents": 2,
+      "n_coeff_columns": 2,
+      "produced": [
+        {
+          "L": "D",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 9,
+          "n_primitives": 1
+        },
+        {
+          "L": "D",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 10,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "F",
+      "n_exponents": 1,
+      "n_coeff_columns": 1,
+      "produced": [
+        {
+          "L": "F",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 11,
+          "n_primitives": 1
+        }
+      ]
+    }
+  ],
+  "Si": [
+    {
+      "input_L": "S",
+      "n_exponents": 15,
+      "n_coeff_columns": 5,
+      "produced": [
+        {
+          "L": "S",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 0,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 1,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 2,
+          "n_primitives": 1
+        },
+        {
+          "L": "S",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 3,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 4,
+          "status": "kept",
+          "shell_id": 4,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "P",
+      "n_exponents": 9,
+      "n_coeff_columns": 4,
+      "produced": [
+        {
+          "L": "P",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 5,
+          "n_primitives": 9
+        },
+        {
+          "L": "P",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 6,
+          "n_primitives": 1
+        },
+        {
+          "L": "P",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 7,
+          "n_primitives": 9
+        },
+        {
+          "L": "P",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 8,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "D",
+      "n_exponents": 2,
+      "n_coeff_columns": 2,
+      "produced": [
+        {
+          "L": "D",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 9,
+          "n_primitives": 1
+        },
+        {
+          "L": "D",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 10,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "F",
+      "n_exponents": 1,
+      "n_coeff_columns": 1,
+      "produced": [
+        {
+          "L": "F",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 11,
+          "n_primitives": 1
+        }
+      ]
+    }
+  ],
+  "P": [
+    {
+      "input_L": "S",
+      "n_exponents": 15,
+      "n_coeff_columns": 5,
+      "produced": [
+        {
+          "L": "S",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 0,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 1,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 2,
+          "n_primitives": 1
+        },
+        {
+          "L": "S",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 3,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 4,
+          "status": "kept",
+          "shell_id": 4,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "P",
+      "n_exponents": 9,
+      "n_coeff_columns": 4,
+      "produced": [
+        {
+          "L": "P",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 5,
+          "n_primitives": 9
+        },
+        {
+          "L": "P",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 6,
+          "n_primitives": 1
+        },
+        {
+          "L": "P",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 7,
+          "n_primitives": 9
+        },
+        {
+          "L": "P",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 8,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "D",
+      "n_exponents": 2,
+      "n_coeff_columns": 2,
+      "produced": [
+        {
+          "L": "D",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 9,
+          "n_primitives": 1
+        },
+        {
+          "L": "D",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 10,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "F",
+      "n_exponents": 1,
+      "n_coeff_columns": 1,
+      "produced": [
+        {
+          "L": "F",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 11,
+          "n_primitives": 1
+        }
+      ]
+    }
+  ],
+  "S": [
+    {
+      "input_L": "S",
+      "n_exponents": 15,
+      "n_coeff_columns": 5,
+      "produced": [
+        {
+          "L": "S",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 0,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 1,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 2,
+          "n_primitives": 1
+        },
+        {
+          "L": "S",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 3,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 4,
+          "status": "kept",
+          "shell_id": 4,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "P",
+      "n_exponents": 9,
+      "n_coeff_columns": 4,
+      "produced": [
+        {
+          "L": "P",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 5,
+          "n_primitives": 9
+        },
+        {
+          "L": "P",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 6,
+          "n_primitives": 1
+        },
+        {
+          "L": "P",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 7,
+          "n_primitives": 9
+        },
+        {
+          "L": "P",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 8,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "D",
+      "n_exponents": 2,
+      "n_coeff_columns": 2,
+      "produced": [
+        {
+          "L": "D",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 9,
+          "n_primitives": 1
+        },
+        {
+          "L": "D",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 10,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "F",
+      "n_exponents": 1,
+      "n_coeff_columns": 1,
+      "produced": [
+        {
+          "L": "F",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 11,
+          "n_primitives": 1
+        }
+      ]
+    }
+  ],
+  "Cl": [
+    {
+      "input_L": "S",
+      "n_exponents": 15,
+      "n_coeff_columns": 5,
+      "produced": [
+        {
+          "L": "S",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 0,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 1,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 2,
+          "n_primitives": 1
+        },
+        {
+          "L": "S",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 3,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 4,
+          "status": "kept",
+          "shell_id": 4,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "P",
+      "n_exponents": 9,
+      "n_coeff_columns": 4,
+      "produced": [
+        {
+          "L": "P",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 5,
+          "n_primitives": 9
+        },
+        {
+          "L": "P",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 6,
+          "n_primitives": 1
+        },
+        {
+          "L": "P",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 7,
+          "n_primitives": 9
+        },
+        {
+          "L": "P",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 8,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "D",
+      "n_exponents": 2,
+      "n_coeff_columns": 2,
+      "produced": [
+        {
+          "L": "D",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 9,
+          "n_primitives": 1
+        },
+        {
+          "L": "D",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 10,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "F",
+      "n_exponents": 1,
+      "n_coeff_columns": 1,
+      "produced": [
+        {
+          "L": "F",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 11,
+          "n_primitives": 1
+        }
+      ]
+    }
+  ],
+  "Ar": [
+    {
+      "input_L": "S",
+      "n_exponents": 15,
+      "n_coeff_columns": 5,
+      "produced": [
+        {
+          "L": "S",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 0,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 1,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 2,
+          "n_primitives": 1
+        },
+        {
+          "L": "S",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 3,
+          "n_primitives": 15
+        },
+        {
+          "L": "S",
+          "column": 4,
+          "status": "kept",
+          "shell_id": 4,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "P",
+      "n_exponents": 9,
+      "n_coeff_columns": 4,
+      "produced": [
+        {
+          "L": "P",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 5,
+          "n_primitives": 9
+        },
+        {
+          "L": "P",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 6,
+          "n_primitives": 1
+        },
+        {
+          "L": "P",
+          "column": 2,
+          "status": "kept",
+          "shell_id": 7,
+          "n_primitives": 9
+        },
+        {
+          "L": "P",
+          "column": 3,
+          "status": "kept",
+          "shell_id": 8,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "D",
+      "n_exponents": 2,
+      "n_coeff_columns": 2,
+      "produced": [
+        {
+          "L": "D",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 9,
+          "n_primitives": 1
+        },
+        {
+          "L": "D",
+          "column": 1,
+          "status": "kept",
+          "shell_id": 10,
+          "n_primitives": 1
+        }
+      ]
+    },
+    {
+      "input_L": "F",
+      "n_exponents": 1,
+      "n_coeff_columns": 1,
+      "produced": [
+        {
+          "L": "F",
+          "column": 0,
+          "status": "kept",
+          "shell_id": 11,
+          "n_primitives": 1
+        }
+      ]
+    }
+  ]
+}

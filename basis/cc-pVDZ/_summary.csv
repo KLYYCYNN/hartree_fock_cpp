@@ -1,0 +1,19 @@
+element,actual_shell_count_by_L,n_shells_total,n_csv_rows
+B,3S 2P 1D,6,25
+C,3S 2P 1D,6,25
+F,3S 2P 1D,6,25
+H,2S 1P,3,6
+N,3S 2P 1D,6,25
+O,3S 2P 1D,6,25
+P,4S 3P 1D,8,55
+S,4S 3P 1D,8,55
+Al,4S 3P 1D,8,55
+Ar,4S 3P 1D,8,55
+Be,3S 2P 1D,6,25
+Cl,4S 3P 1D,8,55
+He,2S 1P,3,6
+Li,3S 2P 1D,6,25
+Mg,4S 3P 1D,8,55
+Na,4S 3P 1D,8,55
+Ne,3S 2P 1D,6,25
+Si,4S 3P 1D,8,55
