@@ -57,8 +57,8 @@ target_link_libraries(test hf_core)
 add_executable(H2O tests/H2O.cpp cuda/eri.cu)
 target_link_libraries(H2O hf_core)
 
-add_executable(2dslice tests/2dslice.cpp)
-target_link_libraries(2dslice vis)
+add_executable(2dslice tests/2dslice.cpp cuda/visual.cu)
+target_link_libraries(2dslice hf_core)
 
 add_executable(cube tests/cube.cpp cuda/visual.cu)
 target_link_libraries(cube hf_core)

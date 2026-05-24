@@ -84,28 +84,27 @@ std::vector<int> test_gpu_basis_read(const std::vector<BasisFunctionGPU>& basis)
 //-------------------BOYS FUNCITON--------------------------
 
 __device__
-double boys_gpu(int m, double T)
+void boys_gpu(int m, double T, double& F)
 {
     if (T < 1e-8) {
-        return 1.0 / (2.0 * m + 1.0);
+        F = 1.0 / (2.0 * m + 1.0);
+        return;
     }
 
-    double F = 0.5 * sqrt(M_PI / T) * erf(sqrt(T));
+    F = 0.5 * sqrt(M_PI / T) * erf(sqrt(T));
 
     for (int k = 0; k < m; ++k) {
         F = ((2.0 * k + 1.0) * F - exp(-T)) / (2.0 * T);
     }
-
-    return F;
 }
 
 
 __global__
 void boys_test_kernel(double* output)
 {
-    output[0] = boys_gpu(0, 1.0);
-    output[1] = boys_gpu(1, 1.0);
-    output[2] = boys_gpu(2, 1.0);
+    boys_gpu(0, 1.0, output[0]);
+    boys_gpu(1, 1.0, output[1]);
+    boys_gpu(2, 1.0, output[2]);
 }
 
 //-------------------------------------------------------------
@@ -136,90 +135,112 @@ std::vector<double> test_gpu_boys(){
     return output;
 }
 
-constexpr int MAX_E = 7;
-
 
 //--------------------HERMITE RECURSION-------------------------
 
 __device__
-void hermite_E_gpu(int i, int j,
+void hermite_E_gpu(int i, int j, int t,
                    double alpha, double beta,
                    double A, double B,
-                   double Eout[MAX_E])
+                   double& out)
 {
-    double E[3][3][MAX_E];
-
-    for (int a = 0; a < 3; ++a)
-        for (int b = 0; b < 3; ++b)
-            for (int t = 0; t < MAX_E; ++t)
-                E[a][b][t] = 0.0;
-
     double p = alpha + beta;
     double q = alpha * beta / p;
     double AB = A - B;
 
-    E[0][0][0] = exp(-q * AB * AB);
-
-    for (int ia = 1; ia <= i; ++ia) {
-        for (int tt = 0; tt <= ia; ++tt) {
-            double term1 = (tt > 0) ? E[ia - 1][0][tt - 1] / (2.0 * p) : 0.0;
-            double term2 = -(beta / p) * AB * E[ia - 1][0][tt];
-            double term3 = (tt + 1 < MAX_E) ? (tt + 1) * E[ia - 1][0][tt + 1] : 0.0;
-
-            E[ia][0][tt] = term1 + term2 + term3;
-        }
+    // invalid Hermite index
+    if (t < 0 || t > i + j) {
+        out = 0.0;
+        return;
     }
 
-    for (int ia = 0; ia <= i; ++ia) {
-        for (int jb = 1; jb <= j; ++jb) {
-            for (int tt = 0; tt <= ia + jb; ++tt) {
-                double term1 = (tt > 0) ? E[ia][jb - 1][tt - 1] / (2.0 * p) : 0.0;
-                double term2 = +(alpha / p) * AB * E[ia][jb - 1][tt];
-                double term3 = (tt + 1 < MAX_E) ? (tt + 1) * E[ia][jb - 1][tt + 1] : 0.0;
-
-                E[ia][jb][tt] = term1 + term2 + term3;
-            }
-        }
+    // base case
+    if (i == 0 && j == 0 && t == 0) {
+        out = exp(-q * AB * AB);
+        return;
     }
 
-    for (int tt = 0; tt < MAX_E; ++tt)
-        Eout[tt] = 0.0;
+    // if no angular momentum left but t is nonzero
+    if (i == 0 && j == 0) {
+        out = 0.0;
+        return;
+    }
 
-    for (int tt = 0; tt <= i + j; ++tt)
-        Eout[tt] = E[i][j][tt];
+    double term1 = 0.0;
+    double term2 = 0.0;
+    double term3 = 0.0;
+
+    if (i > 0) {
+        double E1, E2, E3;
+
+        hermite_E_gpu(i - 1, j, t - 1,
+                             alpha, beta, A, B, E1);
+
+        hermite_E_gpu(i - 1, j, t,
+                             alpha, beta, A, B, E2);
+
+        hermite_E_gpu(i - 1, j, t + 1,
+                             alpha, beta, A, B, E3);
+
+        term1 = E1 / (2.0 * p);
+        term2 = -(beta / p) * AB * E2;
+        term3 = (t + 1) * E3;
+
+        out = term1 + term2 + term3;
+        return;
+    }
+
+    if (j > 0) {
+        double E1, E2, E3;
+
+        hermite_E_gpu(i, j - 1, t - 1,
+                             alpha, beta, A, B, E1);
+
+        hermite_E_gpu(i, j - 1, t,
+                             alpha, beta, A, B, E2);
+
+        hermite_E_gpu(i, j - 1, t + 1,
+                             alpha, beta, A, B, E3);
+
+        term1 = E1 / (2.0 * p);
+        term2 = +(alpha / p) * AB * E2;
+        term3 = (t + 1) * E3;
+
+        out = term1 + term2 + term3;
+        return;
+    }
 }
 
 //-----------------------------------------------------------------------------
 
 __global__
-void hermite_test_kernel(int i, int j,
+void hermite_test_kernel(int i, int j, int t,
                          double alpha, double beta,
                          double A, double B,
                          double* E_array)
 {
-    hermite_E_gpu(i, j, alpha, beta, A, B, E_array);
+    hermite_E_gpu(i, j, t, alpha, beta, A, B, E_array[0]);
 }
 
 
-std::vector<double> hermite_E_test(int i, int j,
-                                   double alpha, double beta,
-                                   double A, double B)
+
+double hermite_E_test(int i, int j, int t,
+                      double alpha, double beta,
+                      double A, double B)
 {
-    int n = i + j + 1;
-
-    std::vector<double> output(n);
-
+    double output = 0.0;
     double* d_output = nullptr;
-    CUDA_CHECK(cudaMalloc(&d_output, n * sizeof(double)));
 
-    hermite_test_kernel<<<1, 1>>>(i, j, alpha, beta, A, B, d_output);
+    CUDA_CHECK(cudaMalloc(&d_output, sizeof(double)));
+
+    hermite_test_kernel<<<1, 1>>>(i, j, t, alpha, beta, A, B, d_output);
 
     CUDA_CHECK(cudaGetLastError());
     CUDA_CHECK(cudaDeviceSynchronize());
 
-    CUDA_CHECK(cudaMemcpy(output.data(),
+    CUDA_CHECK(cudaMemcpy(&output,
                           d_output,
-                          n * sizeof(double),
+                          sizeof(double),
                           cudaMemcpyDeviceToHost));
 
     CUDA_CHECK(cudaFree(d_output));
@@ -230,21 +251,26 @@ std::vector<double> hermite_E_test(int i, int j,
 
 //------------------------COULOMB R RECURSION------------------------------------------------
 
-constexpr int MAX_R = 9;  // enough for up to d-functions: t+u+v <= 8
+constexpr int MAX_R = 5; // enough for up to f/g in many cases
 
 __device__
-int ridx(int a, int b, int c, int m)
+int r3idx(int a, int b, int c)
 {
-    return (((a * MAX_R + b) * MAX_R + c) * MAX_R + m);
+    return (a * MAX_R + b) * MAX_R + c;
 }
 
-
 __device__
-double coulomb_R_gpu(int ta, int ub, int vc, int n,
-                     double p, double q,
-                     double Px, double Py, double Pz,
-                     double Qx, double Qy, double Qz)
+void coulomb_R_gpu(int ta, int ub, int vc, int n,
+                   double p, double q,
+                        double Px, double Py, double Pz,
+                        double Qx, double Qy, double Qz,
+                        double& out)
 {
+    if (ta >= MAX_R || ub >= MAX_R || vc >= MAX_R) {
+        out = 0.0;
+        return;
+    }
+
     double rho = p * q / (p + q);
 
     double X = Px - Qx;
@@ -253,46 +279,71 @@ double coulomb_R_gpu(int ta, int ub, int vc, int n,
 
     double T = rho * (X*X + Y*Y + Z*Z);
 
-    double R[MAX_R * MAX_R * MAX_R * MAX_R];
-
-    for (int i = 0; i < MAX_R * MAX_R * MAX_R * MAX_R; ++i)
-        R[i] = 0.0;
-
     int max_m = ta + ub + vc + n;
 
-    for (int m = 0; m <= max_m; ++m) {
-        R[ridx(0,0,0,m)] = pow(-2.0 * rho, m) * boys_gpu(m, T);
+    double R_next[MAX_R * MAX_R * MAX_R];
+    double R_curr[MAX_R * MAX_R * MAX_R];
+
+    for (int i = 0; i < MAX_R * MAX_R * MAX_R; ++i) {
+        R_next[i] = 0.0;
+        R_curr[i] = 0.0;
     }
 
+    // highest Boys order layer
+    double F;
+    boys_gpu(max_m, T, F);
+    R_next[r3idx(0,0,0)] = pow(-2.0 * rho, max_m) * F;
+
+    // descend m = max_m - 1 down to n
     for (int m = max_m - 1; m >= n; --m) {
+
+        for (int i = 0; i < MAX_R * MAX_R * MAX_R; ++i)
+            R_curr[i] = 0.0;
+
+        double Fm;
+        boys_gpu(m, T, Fm);
+        R_curr[r3idx(0,0,0)] = pow(-2.0 * rho, m) * Fm;
+
         for (int a = 0; a <= ta; ++a) {
             for (int b = 0; b <= ub; ++b) {
                 for (int c = 0; c <= vc; ++c) {
 
                     if (a == 0 && b == 0 && c == 0) continue;
 
-                    double value = 0.0;
+                    double val = 0.0;
 
                     if (a > 0) {
-                        value = (a - 1) * ((a >= 2) ? R[ridx(a-2,b,c,m+1)] : 0.0)
-                              + X * R[ridx(a-1,b,c,m+1)];
+                        val = X * R_next[r3idx(a-1,b,c)];
+
+                        if (a >= 2) {
+                            val += (a - 1) * R_next[r3idx(a-2,b,c)];
+                        }
                     }
                     else if (b > 0) {
-                        value = (b - 1) * ((b >= 2) ? R[ridx(a,b-2,c,m+1)] : 0.0)
-                              + Y * R[ridx(a,b-1,c,m+1)];
+                        val = Y * R_next[r3idx(a,b-1,c)];
+
+                        if (b >= 2) {
+                            val += (b - 1) * R_next[r3idx(a,b-2,c)];
+                        }
                     }
                     else if (c > 0) {
-                        value = (c - 1) * ((c >= 2) ? R[ridx(a,b,c-2,m+1)] : 0.0)
-                              + Z * R[ridx(a,b,c-1,m+1)];
+                        val = Z * R_next[r3idx(a,b,c-1)];
+
+                        if (c >= 2) {
+                            val += (c - 1) * R_next[r3idx(a,b,c-2)];
+                        }
                     }
 
-                    R[ridx(a,b,c,m)] = value;
+                    R_curr[r3idx(a,b,c)] = val;
                 }
             }
         }
+
+        for (int i = 0; i < MAX_R * MAX_R * MAX_R; ++i)
+            R_next[i] = R_curr[i];
     }
 
-    return R[ridx(ta, ub, vc, n)];
+    out = R_next[r3idx(ta, ub, vc)];
 }
 
 //---------------------------------------------------------------------------------------
@@ -304,10 +355,10 @@ void coulomb_R_test_kernel(int t, int u, int v, int n,
                            double Qx, double Qy, double Qz,
                            double* output)
 {
-    output[0] = coulomb_R_gpu(t, u, v, n,
-                              p, q,
-                              Px, Py, Pz,
-                              Qx, Qy, Qz);
+    coulomb_R_gpu(t, u, v, n,
+                  p, q,
+                  Px, Py, Pz,
+                  Qx, Qy, Qz, output[0]);
 }
 
 
@@ -344,14 +395,15 @@ double coulomb_R_test_gpu(int t, int u, int v, int n,
 //-------------------------PRIMITIVE TWO-ELECTRON INTEGRAL-------------------------------------
 
 __device__
-double PrimitiveRepulsionGPU(const PrimitiveGPU& g1,
-                             const PrimitiveGPU& g2,
-                             const PrimitiveGPU& g3,
-                             const PrimitiveGPU& g4,
-                             const BasisFunctionGPU b1,
-                             const BasisFunctionGPU b2,
-                             const BasisFunctionGPU b3,
-                             const BasisFunctionGPU b4)
+void PrimitiveRepulsionGPU(const PrimitiveGPU& g1,
+                           const PrimitiveGPU& g2,
+                           const PrimitiveGPU& g3,
+                           const PrimitiveGPU& g4,
+                           const BasisFunctionGPU b1,
+                           const BasisFunctionGPU b2,
+                           const BasisFunctionGPU b3,
+                           const BasisFunctionGPU b4,
+                           double& val)
 {
     int l1 = b1.lx;
     int l2 = b2.lx;
@@ -376,18 +428,7 @@ double PrimitiveRepulsionGPU(const PrimitiveGPU& g1,
     double Qy = (g3.alpha * b3.y + g4.alpha * b4.y) / q;
     double Qz = (g3.alpha * b3.z + g4.alpha * b4.z) / q;
 
-
-    double E1[MAX_E], E2[MAX_E], E3[MAX_E];
-    double E4[MAX_E], E5[MAX_E], E6[MAX_E];
-
-    hermite_E_gpu(l1, l2, g1.alpha, g2.alpha, b1.x, b2.x, E1);
-    hermite_E_gpu(m1, m2, g1.alpha, g2.alpha, b1.y, b2.y, E2);
-    hermite_E_gpu(n1, n2, g1.alpha, g2.alpha, b1.z, b2.z, E3);
-    hermite_E_gpu(l3, l4, g3.alpha, g4.alpha, b3.x, b4.x, E4);
-    hermite_E_gpu(m3, m4, g3.alpha, g4.alpha, b3.y, b4.y, E5);
-    hermite_E_gpu(n3, n4, g3.alpha, g4.alpha, b3.z, b4.z, E6);
-
-    double eri = 0.0;
+    val = 0.0;
 
     for (int t = 0; t <= l1 + l2; ++ t){
         for (int u = 0; u <= m1 + m2; ++ u){
@@ -397,34 +438,41 @@ double PrimitiveRepulsionGPU(const PrimitiveGPU& g1,
                         for (int phi = 0; phi <= n3 + n4; ++ phi){
 
                             double sign = ((tau + nu + phi) % 2 == 0) ? 1.0 : -1.0;
+                            double E1, E2, E3, E4, E5, E6, R;
 
-                            eri += sign *
-                                   E1[t] * E2[u] * E3[v] *
-                                   E4[tau] * E5[nu] * E6[phi] *
-                                   coulomb_R_gpu(t + tau, u + nu, v + phi,
-                                                 0, p, q,
-                                                 Px, Py, Pz,
-                                                 Qx, Qy, Qz);
+                            hermite_E_gpu(l1, l2, t, g1.alpha, g2.alpha, b1.x, b2.x, E1);
+                            hermite_E_gpu(m1, m2, u, g1.alpha, g2.alpha, b1.y, b2.y, E2);
+                            hermite_E_gpu(n1, n2, v, g1.alpha, g2.alpha, b1.z, b2.z, E3);
+                            hermite_E_gpu(l3, l4, tau, g3.alpha, g4.alpha, b3.x, b4.x, E4);
+                            hermite_E_gpu(m3, m4, nu, g3.alpha, g4.alpha, b3.y, b4.y, E5);
+                            hermite_E_gpu(n3, n4, phi, g3.alpha, g4.alpha, b3.z, b4.z, E6);
 
+                            coulomb_R_gpu(t + tau, u + nu, v + phi, 0, 
+                                          p, q, Px, Py, Pz, Qx, Qy, Qz, R);
+
+                            val += sign * E1 * E2 * E3 * E4 * E5 * E6 * R;
+                
                         }
                     }
                 }
             }
         }
     }
-    return 2 * pow(M_PI, 2.5) * pow(p + q, -0.5) * eri / (p * q);
+    
+    val *= 2 * pow(M_PI, 2.5) * pow(p + q, -0.5) / (p * q);
 }
 
 
 //-----------------------BASIS LEVEL TWO-ELECTRON INTEGRAL-----------------------------
 
 __device__
-double BasisRepulsionGPU(const BasisFunctionGPU& b1,
-                         const BasisFunctionGPU& b2,
-                         const BasisFunctionGPU& b3,
-                         const BasisFunctionGPU& b4)
+void BasisRepulsionGPU(const BasisFunctionGPU& b1,
+                       const BasisFunctionGPU& b2,
+                       const BasisFunctionGPU& b3,
+                       const BasisFunctionGPU& b4,
+                       double& eri)
 {
-    double eri = 0.0;
+    eri = 0.0;
 
     for (int i = 0; i < b1.nprims; ++ i){
         for (int j = 0; j < b2.nprims; ++ j){
@@ -436,15 +484,18 @@ double BasisRepulsionGPU(const BasisFunctionGPU& b1,
                     PrimitiveGPU g3 = b3.prims[k];
                     PrimitiveGPU g4 = b4.prims[l];
 
+                    double p_eri;
+                    PrimitiveRepulsionGPU(g1, g2, g3, g4, 
+                                          b1, b2, b3, b4, 
+                                          p_eri);
+
                     eri += g1.coeff * g2.coeff * g3.coeff * g4.coeff *
-                           g1.norm * g2.norm * g3.norm * g4.norm * 
-                           PrimitiveRepulsionGPU(g1, g2, g3, g4, b1, b2, b3, b4);
+                           g1.norm * g2.norm * g3.norm * g4.norm * p_eri;
 
                 }
             }
         }
     }
-    return eri;
 }
 
 //I need to write some comments to help make sure I don't forget the math
@@ -493,9 +544,23 @@ double BasisRepulsionGPU(const BasisFunctionGPU& b1,
 
 //convert 1d flattened triangular indices to 2d (row, col)
 __device__
-void pair_to_indices(int pid, int& a, int& b) {
-    a = int((sqrt(8.0 * pid + 1.0) - 1.0) / 2.0);
-    b = pid - a * (a + 1) / 2;
+void pair_to_indices(int pid, int& a, int& b)
+{
+    a = int((sqrt(8.0 * pid + 1.0) - 1.0) * 0.5);
+
+    int tri = a * (a + 1) / 2;
+
+    if (tri > pid) {
+        --a;
+        tri = a * (a + 1) / 2;
+    }
+
+    while ((a + 1) * (a + 2) / 2 <= pid) {
+        ++a;
+        tri = a * (a + 1) / 2;
+    }
+
+    b = pid - tri;
 }
 
 
@@ -513,18 +578,26 @@ void eri_bounds(int K, double* bounds, BasisFunctionGPU* basis)
     int n_pairs = K * (K + 1) / 2;
     if (pid >= n_pairs) return;
 
-    // invert triangular index:
-    // find mu such that mu(mu+1)/2 <= pid < (mu+1)(mu+2)/2
     int mu, nu;
     pair_to_indices(pid, mu, nu);
 
-    // compute (mu nu | mu nu)
-    double eri = BasisRepulsionGPU(basis[mu], basis[nu],
-                                   basis[mu], basis[nu]);
+    if (mu < 0 || mu >= K || nu < 0 || nu >= K) {
+        bounds[pid] = -1.0;
+        return;
+    }
+
+    if (basis[mu].nprims < 0 || basis[mu].nprims > MAX_PRIMS ||
+        basis[nu].nprims < 0 || basis[nu].nprims > MAX_PRIMS) {
+        bounds[pid] = -2.0;
+        return;
+    }
+
+    double eri = 0.0;
+    BasisRepulsionGPU(basis[mu], basis[nu],
+                      basis[mu], basis[nu], eri);
 
     bounds[pid] = sqrt(fmax(eri, 0.0));
 }
-
 //----------------------KERNEL TO COMPUTE ERI--------------------------
 //--------------------GPU SIDE OF HYBRID APPROACH--------------------
 
@@ -546,7 +619,7 @@ void eri_kernel(const BasisFunctionGPU* basis,
     int p, q;
     pair_to_indices(qid, p, q);
 
-    if (bounds[p] * bounds[q] < threshold) {
+    if (bounds[p] * bounds[q] < threshold) { //schwarz screening
         unique_eri[local_qid] = 0.0;
         return;
     }
@@ -555,10 +628,9 @@ void eri_kernel(const BasisFunctionGPU* basis,
     pair_to_indices(p, mu, nu);
     pair_to_indices(q, lambda, sigma);
 
-    unique_eri[local_qid] = BasisRepulsionGPU(
-        basis[mu], basis[nu],
-        basis[lambda], basis[sigma]
-    );
+    BasisRepulsionGPU(basis[mu], basis[nu],
+    basis[lambda], basis[sigma], unique_eri[local_qid]);
+
 }
 
 
@@ -713,8 +785,9 @@ void eri_gpu_kernel(const BasisFunctionGPU* basis,
     pair_to_indices(q, lambda, sigma);
 
     //compute the integral on the surviving quartets only.
-    double val = BasisRepulsionGPU(basis[mu], basis[nu],
-                                   basis[lambda], basis[sigma]);
+    double val;
+    BasisRepulsionGPU(basis[mu], basis[nu],
+    basis[lambda], basis[sigma], val);
 
     ERI[rank4idx(mu, nu, lambda, sigma, K)] = val;
     ERI[rank4idx(nu, mu, lambda, sigma, K)] = val;

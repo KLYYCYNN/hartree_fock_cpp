@@ -1,4 +1,5 @@
 #include "cube.hpp"
+#include "visual.hpp"
 
 int main(){
 
@@ -21,8 +22,8 @@ int main(){
     square surface;
     surface.center = position_vector(0.5, 0.0, 0.0);
     surface.A = position_vector(0.5, 1.0, 0.0);
-    surface.B = position_vector(1.0, 0.0, 0.0);
-    surface.L = 7.0;
+    surface.B = position_vector(0.5, 0.0, 1.0);
+    surface.L = 12.0;
 
-    density2d(save_path, "density_slice", basis, P_matrix, surface, 1024);
+    rhf_2d_homo_lumo(save_path, "homo_lumo1", basis, C_matrix, 10, surface, 1024);
 }
