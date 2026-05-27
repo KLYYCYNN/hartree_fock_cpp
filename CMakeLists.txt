@@ -28,6 +28,7 @@ add_library(hf_core INTERFACE)
 target_include_directories(hf_core INTERFACE
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/external/rapidcsv
+    ${CMAKE_SOURCE_DIR}/cuda/include
 )
 
 target_link_libraries(hf_core INTERFACE
@@ -63,3 +64,6 @@ target_link_libraries(2dslice hf_core)
 add_executable(cube tests/cube.cpp cuda/visual.cu)
 target_link_libraries(cube hf_core)
 
+add_executable(test1 tests/test.cu)
+target_link_libraries(test1 hf_core)
+#---------------------------------------------------

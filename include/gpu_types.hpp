@@ -2,7 +2,7 @@
 #include "types.hpp"
 #include "basis.hpp"
 
-constexpr int MAX_PRIMS = 11;
+constexpr int MAX_PRIMS = 16;
 
 struct PrimitiveGPU {
     double alpha;
