@@ -1,4 +1,6 @@
+#pragma once
 #include "recursion.cuh"
+#include "indexing.cuh"
 #include "gpu_types.hpp"
 
 __device__ __host__
@@ -76,4 +78,93 @@ void primitive_eri_gpu(const PrimitiveGPU& p1, const PrimitiveGPU& p2,
 
     eri *= 2.0 * pow(PI_GPU, 2.5) / (p * q * sqrt(p + q));
 
+}
+
+
+
+__global__
+void eri_kernel(const BasisFunctionGPU* basis,
+                const double* bounds,
+                const int K,
+                const double threshold,
+                double* unique_eri)
+{
+    // let one block handkle one basis function quartet,
+    // and one thread handle one primitive quartet
+    int qid = blockIdx.x;
+
+    int n_pairs = K * (K + 1) / 2;
+    int n_quartets = n_pairs * (n_pairs + 1) / 2;
+
+    if (qid > n_quartets){
+        return;
+    }
+
+    int p1id, p2id;
+    pair_to_indices(qid, p1id, p2id);
+
+    //schwarz screening
+    if (bounds[p1id] * bounds[p2id] < threshold){
+        if (threadIdx.x == 0) unique_eri[qid] = 0.0;
+        return;
+    }
+
+    // get the basis function indices for this block quartet
+    int mu, nu, lam, sig;
+    pair_to_indices(p1id, mu, nu);
+    pair_to_indices(p2id, lam, sig);
+
+    BasisFunctionGPU b1 = basis[mu];
+    BasisFunctionGPU b2 = basis[nu];
+    BasisFunctionGPU b3 = basis[lam];
+    BasisFunctionGPU b4 = basis[sig];
+
+    // total number of primitive quartets in this block
+    int Nprim = b1.nprims * b2.nprims * b3.nprims * b4.nprims;
+
+    double local = 0.0; // local sum within block
+
+    for (int q = threadIdx.x; q < Nprim; q += blockDim.x) {
+
+        // generate 4 primitive indices from thread id
+        int l = q % b4.nprims;
+        int tmp = q / b4.nprims;
+
+        int k = tmp % b3.nprims;
+        tmp /= b3.nprims;
+
+        int j = tmp % b2.nprims;
+        int i = tmp / b2.nprims;
+
+        PrimitiveGPU p1 = b1.prims[i];
+        PrimitiveGPU p2 = b2.prims[j];
+        PrimitiveGPU p3 = b3.prims[k];
+        PrimitiveGPU p4 = b4.prims[l];
+
+        double prim_eri;
+        primitive_eri_gpu(p1, p2, p3, p4,
+                          b1, b2, b3, b4,
+                          prim_eri);
+
+        local += p1.coeff * p2.coeff * p3.coeff * p4.coeff *
+                 p1.norm  * p2.norm  * p3.norm  * p4.norm  *
+                 prim_eri;
+    }
+
+    //sum over thread quartets
+    extern __shared__ double sh[];
+
+    sh[threadIdx.x] = local;
+    __syncthreads();
+
+    for (int stride = blockDim.x / 2; stride > 0; stride >>= 1) {
+        if (threadIdx.x < stride) {
+            sh[threadIdx.x] += sh[threadIdx.x + stride];
+        }
+        __syncthreads();
+    }
+
+    if (threadIdx.x == 0) {
+        unique_eri[qid] = sh[0];
+    }
 }

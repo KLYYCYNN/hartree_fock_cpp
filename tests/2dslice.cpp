@@ -3,7 +3,7 @@
 
 int main(){
 
-    std::string save_path = "/home/jc6224/hf_cpp/data/H2O";
+    std::string save_path = "/home/jc6224/hf_cpp/data/test5";
     std::string basis_file = save_path + "/basis.csv";
     std::string param_path = "/home/jc6224/hf_cpp/basis";
 
@@ -20,10 +20,10 @@ int main(){
                                    <double>("coefficient_matrix");
 
     square surface;
-    surface.center = position_vector(0.5, 0.0, 0.0);
-    surface.A = position_vector(0.5, 1.0, 0.0);
-    surface.B = position_vector(0.5, 0.0, 1.0);
-    surface.L = 12.0;
+    surface.center = position_vector(0.0, 0.0, 0.0);
+    surface.A = position_vector(1.0, 0.0, 0.0);
+    surface.B = position_vector(1.0, 1.0, 0.0);
+    surface.L = 10.0;
 
-    rhf_2d_homo_lumo(save_path, "homo_lumo1", basis, C_matrix, 10, surface, 1024);
+    density2d(save_path, "density2d", basis, P_matrix, surface, 2048);
 }

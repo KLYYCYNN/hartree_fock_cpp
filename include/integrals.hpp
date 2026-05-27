@@ -332,77 +332,124 @@ std::vector<double> hermite_E_array(
     return result;
 }
 
-// for attraction integrals, C is the position vector of the nucleus
+
+
+inline constexpr int max_l = 3;                  // up to f
+inline constexpr int max_R_order = 4 * max_l;    // ffff max = 12
+
 inline
-double coulomb_R_attraction(int t, int u, int v, int n, double p, 
-                            vector3 P, vector3 C) {  
-    if (t < 0 || u < 0 || v < 0 || n < 0) return 0.0;
+constexpr int n_R =
+    (max_R_order + 1) *
+    (max_R_order + 2) *
+    (max_R_order + 3) / 6;
 
-    const double rho = p;
-    const double T = p * distance2(P, C);
 
-    const double X = P.x - C.x;
-    const double Y = P.y - C.y;
-    const double Z = P.z - C.z;
 
-    // Need enough n-depth because recursion increases n.
-    const int max_order = t + u + v + n + 2;
-
-    std::vector<std::vector<std::vector<std::vector<double>>>> memo(
-        t + 1,
-        std::vector<std::vector<std::vector<double>>>(
-            u + 1,
-            std::vector<std::vector<double>>(
-                v + 1,
-                std::vector<double>(max_order + 1, 0.0)
-            )
-        )
-    );
-
-    std::vector<std::vector<std::vector<std::vector<bool>>>> seen(
-        t + 1,
-        std::vector<std::vector<std::vector<bool>>>(
-            u + 1,
-            std::vector<std::vector<bool>>(
-                v + 1,
-                std::vector<bool>(max_order + 1, false)
-            )
-        )
-    );
-
-    std::function<double(int,int,int,int)> R =
-        [&](int a, int b, int c, int m) -> double {
-            if (a < 0 || b < 0 || c < 0 || m < 0) return 0.0;
-
-            if (seen[a][b][c][m]) {
-                return memo[a][b][c][m];
-            }
-
-            double value = 0.0;
-
-            if (a == 0 && b == 0 && c == 0) {
-                value = std::pow(-2.0 * rho, m) * boys(m, T);
-            }
-            else if (a > 0) {
-                value = (a - 1) * R(a - 2, b, c, m + 1)
-                      + X * R(a - 1, b, c, m + 1);
-            }
-            else if (b > 0) {
-                value = (b - 1) * R(a, b - 2, c, m + 1)
-                      + Y * R(a, b - 1, c, m + 1);
-            }
-            else if (c > 0) {
-                value = (c - 1) * R(a, b, c - 2, m + 1)
-                      + Z * R(a, b, c - 1, m + 1);
-            }
-
-            seen[a][b][c][m] = true;
-            memo[a][b][c][m] = value;
-            return value;
-        };
-
-    return R(t, u, v, n);
+inline
+bool valid_r_index_cpu(int a, int b, int c)
+{
+    return a >= 0 && b >= 0 && c >= 0 &&
+           a + b + c <= max_R_order;
 }
+
+inline
+int packed_r_index_cpu(int a, int b, int c)
+{
+    int s = a + b + c;
+
+    int offset_s = s * (s + 1) * (s + 2) / 6;
+
+    int offset_a = 0;
+    for (int aa = 0; aa < a; ++aa) {
+        offset_a += (s - aa + 1);
+    }
+
+    int offset_b = b;
+
+    return offset_s + offset_a + offset_b;
+}
+
+
+
+inline
+double coulomb_R_attraction(int tx, int ty, int tz, int n,
+                                double p,
+                                vector3 P, vector3 C)
+{
+    int max_order = tx + ty + tz + n;
+
+    if (max_order > max_R_order ||
+        !valid_r_index_cpu(tx, ty, tz)) {
+        return 0.0;
+    }
+
+    double rho = p;
+
+    double X = P.x - C.x;
+    double Y = P.y - C.y;
+    double Z = P.z - C.z;
+
+    double T = p * (X*X + Y*Y + Z*Z);
+
+    std::vector<double> Rnext(n_R, 0.0);
+    std::vector<double> Rcurr(n_R, 0.0);
+
+    Rnext[packed_r_index_cpu(0, 0, 0)] =
+        std::pow(-2.0 * rho, max_order) * boys(max_order, T);
+
+    for (int m = max_order - 1; m >= n; --m) {
+
+        std::fill(Rcurr.begin(), Rcurr.end(), 0.0);
+
+        Rcurr[packed_r_index_cpu(0, 0, 0)] =
+            std::pow(-2.0 * rho, m) * boys(m, T);
+
+        for (int s = 1; s <= tx + ty + tz; ++s) {
+            for (int a = 0; a <= s; ++a) {
+                for (int b = 0; b <= s - a; ++b) {
+
+                    int c = s - a - b;
+
+                    if (a > tx || b > ty || c > tz) continue;
+
+                    double val = 0.0;
+
+                    if (a > 0) {
+                        val = X * Rnext[packed_r_index_cpu(a - 1, b, c)];
+
+                        if (a >= 2) {
+                            val += (a - 1) *
+                                   Rnext[packed_r_index_cpu(a - 2, b, c)];
+                        }
+                    }
+                    else if (b > 0) {
+                        val = Y * Rnext[packed_r_index_cpu(a, b - 1, c)];
+
+                        if (b >= 2) {
+                            val += (b - 1) *
+                                   Rnext[packed_r_index_cpu(a, b - 2, c)];
+                        }
+                    }
+                    else if (c > 0) {
+                        val = Z * Rnext[packed_r_index_cpu(a, b, c - 1)];
+
+                        if (c >= 2) {
+                            val += (c - 1) *
+                                   Rnext[packed_r_index_cpu(a, b, c - 2)];
+                        }
+                    }
+
+                    Rcurr[packed_r_index_cpu(a, b, c)] = val;
+                }
+            }
+        }
+
+        std::swap(Rnext, Rcurr);
+    }
+
+    return Rnext[packed_r_index_cpu(tx, ty, tz)];
+}
+
 
 
 inline
@@ -504,78 +551,86 @@ std::vector<double> attraction_matrix(const std::vector<basis_function>& basis,
 //----------------------ELECTRON REPULSION----------------------------
 
 inline
-double coulomb_R(int t, int u, int v, int n,
-                 double p, double q,
-                 vector3 P, vector3 Q){
+double coulomb_R(int tx, int ty, int tz, int n,
+                     double p, double q,
+                     vector3 P, vector3 Q)
+{
+    int max_order = tx + ty + tz + n;
 
-    if (t < 0 || u < 0 || v < 0 || n < 0) return 0.0;
+    if (max_order > max_R_order ||
+        !valid_r_index_cpu(tx, ty, tz)) {
+        return 0.0;
+    }
 
-    const double rho = p * q / (p + q);
+    double rho = p * q / (p + q);
 
-    const double X = P.x - Q.x;
-    const double Y = P.y - Q.y;
-    const double Z = P.z - Q.z;
+    double X = P.x - Q.x;
+    double Y = P.y - Q.y;
+    double Z = P.z - Q.z;
 
-    const double T = rho * (X * X + Y * Y + Z * Z);
+    double T = rho * (X*X + Y*Y + Z*Z);
 
-    // Need enough n-depth because recursion increases n.
-    const int max_order = t + u + v + n + 2;
+    std::vector<double> Rnext(n_R, 0.0);
+    std::vector<double> Rcurr(n_R, 0.0);
 
-    std::vector<std::vector<std::vector<std::vector<double>>>> memo(
-        t + 1,
-        std::vector<std::vector<std::vector<double>>>(
-            u + 1,
-            std::vector<std::vector<double>>(
-                v + 1,
-                std::vector<double>(max_order + 1, 0.0)
-            )
-        )
-    );
+    Rnext[packed_r_index_cpu(0, 0, 0)] =
+        std::pow(-2.0 * rho, max_order) * boys(max_order, T);
 
-    std::vector<std::vector<std::vector<std::vector<bool>>>> seen(
-        t + 1,
-        std::vector<std::vector<std::vector<bool>>>(
-            u + 1,
-            std::vector<std::vector<bool>>(
-                v + 1,
-                std::vector<bool>(max_order + 1, false)
-            )
-        )
-    );
+    for (int m = max_order - 1; m >= n; --m) {
 
-    std::function<double(int,int,int,int)> R =
-        [&](int a, int b, int c, int m) -> double {
-            if (a < 0 || b < 0 || c < 0 || m < 0) return 0.0;
+        std::fill(Rcurr.begin(), Rcurr.end(), 0.0);
 
-            if (seen[a][b][c][m]) {
-                return memo[a][b][c][m];
+        Rcurr[packed_r_index_cpu(0, 0, 0)] =
+            std::pow(-2.0 * rho, m) * boys(m, T);
+
+        for (int s = 1; s <= tx + ty + tz; ++s) {
+            for (int a = 0; a <= s; ++a) {
+                for (int b = 0; b <= s - a; ++b) {
+
+                    int c = s - a - b;
+
+                    if (a > tx || b > ty || c > tz) continue;
+
+                    double val = 0.0;
+
+                    if (a > 0) {
+                        val = X * Rnext[packed_r_index_cpu(a - 1, b, c)];
+
+                        if (a >= 2) {
+                            val += (a - 1) *
+                                   Rnext[packed_r_index_cpu(a - 2, b, c)];
+                        }
+                    }
+                    else if (b > 0) {
+                        val = Y * Rnext[packed_r_index_cpu(a, b - 1, c)];
+
+                        if (b >= 2) {
+                            val += (b - 1) *
+                                   Rnext[packed_r_index_cpu(a, b - 2, c)];
+                        }
+                    }
+                    else if (c > 0) {
+                        val = Z * Rnext[packed_r_index_cpu(a, b, c - 1)];
+
+                        if (c >= 2) {
+                            val += (c - 1) *
+                                   Rnext[packed_r_index_cpu(a, b, c - 2)];
+                        }
+                    }
+
+                    Rcurr[packed_r_index_cpu(a, b, c)] = val;
+                }
             }
+        }
 
-            double value = 0.0;
+        std::swap(Rnext, Rcurr);
+    }
 
-            if (a == 0 && b == 0 && c == 0) {
-                value = std::pow(-2.0 * rho, m) * boys(m, T);
-            }
-            else if (a > 0) {
-                value = (a - 1) * R(a - 2, b, c, m + 1)
-                      + X * R(a - 1, b, c, m + 1);
-            }
-            else if (b > 0) {
-                value = (b - 1) * R(a, b - 2, c, m + 1)
-                      + Y * R(a, b - 1, c, m + 1);
-            }
-            else if (c > 0) {
-                value = (c - 1) * R(a, b, c - 2, m + 1)
-                      + Z * R(a, b, c - 1, m + 1);
-            }
-
-            seen[a][b][c][m] = true;
-            memo[a][b][c][m] = value;
-            return value;
-        };
-
-    return R(t, u, v, n);
+    return Rnext[packed_r_index_cpu(tx, ty, tz)];
 }
+
+
+
 
 
 inline

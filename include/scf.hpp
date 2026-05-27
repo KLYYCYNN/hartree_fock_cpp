@@ -6,7 +6,6 @@
 #include <chrono>
 #include <format>
 #include "integrals.hpp"
-#include "indexing.hpp"
 #include "linalg.hpp"
 #include "eri_gpu.hpp"
 
@@ -88,30 +87,29 @@ formatTimeC20(std::chrono::high_resolution_clock::time_point tp) {
 
 scf_data
 scf_cycle(const std::vector<std::pair<std::string, vector3>>& config,
-          const std::vector<double>& P0,
           std::string basis_set,
           std::string param_path,
           int charge = 0,
           std::string eri_device = "CPU", 
+          bool set_initial_density = false,
+          std::vector<double> P0 = {},
           int max_it = 10000, 
           double epsilon = 1e-6,
           double damping = 0.3,
-          double screening_threshold = 1e-8,
-          double hybrid_split = 0.24)
+          double screening_threshold = 1e-8)
 {
     //start timing and initialize variables
     auto t0 = std::chrono::high_resolution_clock::now();                                                            
     std::cout << "\rstarting SCF cycle" << std::flush;
     std::cout << "" <<std::endl;
 
-    if (eri_device != "CPU" && eri_device != "Hybrid" &&
-        eri_device != "GPU"){
-
+    if (eri_device != "CPU" && eri_device != "GPU"){
         throw std::runtime_error("unsupported ERI computing platform");
     }
 
+
     double total_energy = 0.0;
-    std::vector<double> density_matrix = P0;
+    std::vector<double> density_matrix;
     std::vector<double> coeff_matrix;
     std::vector<double> mo_energies;
     bool success = false;
@@ -134,10 +132,24 @@ scf_cycle(const std::vector<std::pair<std::string, vector3>>& config,
 
     std::vector<basis_function> basis = Basis.first;
     int nbasis = basis.size();
-    if (P0.size() != nbasis * nbasis){
-        throw std::runtime_error
-        ("initial density matrix dimension inconsistent with basis size");
+
+    // if there is no input initial density matrix
+    // use a zero matrix as initial guess
+    if (set_initial_density){
+
+        if (P0.size() != nbasis * nbasis){
+            throw std::runtime_error
+            (R"(initial density matrix dimension 
+             inconsistent with basis size)");
+        }
+
+        density_matrix = P0;
+    } else{
+        std::vector<double> zero_vector(nbasis * nbasis, 0.0);
+        density_matrix = zero_vector;
     }
+
+
 
     std::vector<double> H_core = Hcore(molecule, basis);
 
@@ -161,10 +173,6 @@ scf_cycle(const std::vector<std::pair<std::string, vector3>>& config,
 
     if (eri_device == "CPU"){
         ERI = repulsion_tensor(basis, screening_threshold);
-    }
-
-    if (eri_device == "Hybrid"){
-        ERI = ERI_tensor(basis, hybrid_split, screening_threshold);
     }
 
     if (eri_device == "GPU"){

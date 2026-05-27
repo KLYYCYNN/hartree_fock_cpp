@@ -1,3 +1,4 @@
+#pragma once
 #include <cuda_runtime.h>
 
 
@@ -23,8 +24,8 @@ void hermite_E_gpu(int i, int j,
 
     double E[MAX_L + 1][MAX_L + 1][MAX_E];
 
-    for (int a = 0; a < 3; ++a)
-        for (int b = 0; b < 3; ++b)
+    for (int a = 0; a <= MAX_L; ++a)
+        for (int b = 0; b <= MAX_L; ++b)
             for (int t = 0; t < MAX_E; ++t)
                 E[a][b][t] = 0.0;
 
@@ -114,18 +115,18 @@ void boys_gpu(int m, double T, double& F)
     // small-T series:
     // F_m(T) = sum_k (-T)^k / (k! (2m + 2k + 1))
     if (T < 1e-4) {
-        double term = 1.0 / (2.0 * m + 1.0);
-        double sum = term;
+        double term = 1.0;
+        double sum = 0.0;
 
-        for (int k = 1; k < 8; ++k) {
-            term *= -T / static_cast<double>(k);
-            sum += term / (2.0 * m + 2.0 * k + 1.0)
-                        * (2.0 * m + 2.0 * k - 1.0);
+        for (int k = 0; k < 12; ++k) {
+            sum += term / (2.0 * m + 2.0 * k + 1.0);
+            term *= -T / static_cast<double>(k + 1);
         }
 
         F = sum;
         return;
     }
+
 
     // normal branch: start from F0 and recurse upward
     double sqrtT = sqrt(T);

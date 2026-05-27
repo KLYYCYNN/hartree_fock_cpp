@@ -4,14 +4,14 @@ from pandas import read_csv
 import matplotlib.pyplot as plt
 
 # load density matrix slice
-rho = np.loadtxt("/home/jc6224/hf_cpp/data/H2O/homo_lumo1/lumo2d.csv", delimiter=",")
-params = read_csv("/home/jc6224/hf_cpp/data/H2O/homo_lumo1/square.csv")
+rho = np.loadtxt("/home/jc6224/hf_cpp/data/test5/homo_lumo/lumo2d.csv", delimiter=",")
+params = read_csv("/home/jc6224/hf_cpp/data/test5/homo_lumo/square.csv")
 
 
 
 try:
     # Open and read the JSON file
-    with open("/home/jc6224/hf_cpp/data/H2O/homo_lumo1/square.json", 'r') as file:
+    with open("/home/jc6224/hf_cpp/data/test5/homo_lumo/square.json", 'r') as file:
         data = json.load(file)
     
     # Get the value and convert it to a float
@@ -68,5 +68,5 @@ plt.text(
 
 plt.xlabel("slice coordinate along u / a$_0$")
 plt.ylabel("slice coordinate along v / a$_0$")
-plt.colorbar(label=r"$\psi_i$")
+plt.colorbar(label=r"$|\Psi|^2$")
 plt.show()

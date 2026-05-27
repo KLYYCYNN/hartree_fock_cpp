@@ -52,18 +52,24 @@ target_link_libraries(vis INTERFACE
 
 #----------------------------------------------
 
-add_executable(test tests/test.cpp cuda/eri.cu)
+add_executable(test tests/test.cpp cuda/src/eri.cu)
 target_link_libraries(test hf_core)
 
-add_executable(H2O tests/H2O.cpp cuda/eri.cu)
+add_executable(H2O tests/H2O.cpp cuda/src/eri.cu)
 target_link_libraries(H2O hf_core)
 
-add_executable(2dslice tests/2dslice.cpp cuda/visual.cu)
+add_executable(2dslice tests/2dslice.cpp cuda/src/visual.cu)
 target_link_libraries(2dslice hf_core)
 
-add_executable(cube tests/cube.cpp cuda/visual.cu)
+add_executable(cube tests/cube.cpp cuda/src/visual.cu)
 target_link_libraries(cube hf_core)
 
 add_executable(test1 tests/test.cu)
 target_link_libraries(test1 hf_core)
+
+add_executable(test2 tests/test2.cpp cuda/src/eri.cu)
+target_link_libraries(test2 hf_core)
+
+add_executable(debug tests/eri_debug.cpp cuda/src/eri.cu)
+target_link_libraries(debug hf_core)
 #---------------------------------------------------
