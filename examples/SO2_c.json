@@ -1,0 +1,26 @@
+{
+    "basis_path": "/home/jc6224/hf_cpp/basis",
+    "save_path": "/home/jc6224/hf_cpp/data",
+    "folder_name": "so2_c",
+    "basis": "cc-pVTZ",
+    "charge": 0,
+    "eri_hardware": "CPU",
+
+    "atoms": [
+        {
+            "symbol": "S",
+            "coordinate_type": "cartesian",
+            "position": [0.0, 0.0, 0.0]
+        },
+        {
+            "symbol": "O",
+            "coordinate_type": "polar",
+            "position": [2.705, 59.75, 0.0]
+        },
+        {
+            "symbol": "O",
+            "coordinate_type": "polar",
+            "position": [2.705, 59.75, 180.0]
+        }
+    ]
+}

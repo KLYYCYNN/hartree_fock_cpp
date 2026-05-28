@@ -235,77 +235,75 @@ double boys(int m, double T)
         throw std::runtime_error("boys: negative m");
     }
 
-    if (T < 0.0) {
-        throw std::runtime_error("boys: negative T");
+    if (T < 0.0 || !std::isfinite(T)) {
+        throw std::runtime_error("boys: invalid T");
     }
 
-    if (!std::isfinite(T)) {
-        throw std::runtime_error("boys: non-finite T");
-    }
-
-    // Use power series for small T.
-    // F_m(T) = sum_{k=0}^\infty (-T)^k / (k! (2m + 2k + 1))
-    if (T < 1e-5) {
-        double sum = 0.0;
+    // Use series for small/moderate-small T.
+    // This is much safer for high m.
+    if (T < 1e-4) {
         double term = 1.0;
+        double sum = 0.0;
 
-        for (int k = 0; k < 100; ++k) {
-            if (k > 0) {
-                term *= -T / k;
-            }
-
+        for (int k = 0; k < 50; ++k) {
             double add = term / (2.0 * m + 2.0 * k + 1.0);
             sum += add;
 
             if (std::abs(add) < 1e-16 * std::max(1.0, std::abs(sum))) {
                 break;
             }
+
+            term *= -T / static_cast<double>(k + 1);
         }
 
         return sum;
     }
 
-    // F_0(T)
-    double F = 0.5 * std::sqrt(M_PI / T) * std::erf(std::sqrt(T));
+    constexpr double PI = 3.141592653589793238462643383279502884;
 
-    // Upward recursion for moderate/large T
+    double sqrtT = std::sqrt(T);
+    double F = 0.5 * std::sqrt(PI / T) * std::erf(sqrtT);
+
+    double expT = std::exp(-T);
+
     for (int k = 0; k < m; ++k) {
-        F = ((2.0 * k + 1.0) * F - std::exp(-T)) / (2.0 * T);
+        F = ((2.0 * k + 1.0) * F - expT) / (2.0 * T);
     }
 
     return F;
 }
 
+
 inline
-std::vector<double> hermite_E_array(
-    int i,
-    int j,
-    double alpha,
-    double beta,
-    double Ax,
-    double Bx
-) {
-    const int max_t = i + j;
+std::vector<double> hermite_E_array(int i, int j,
+                                    double alpha, double beta,
+                                    double A, double B)
+{
+    constexpr int MAX_L_CPU = 4;
+    constexpr int MAX_E_CPU = 2 * MAX_L_CPU + 1;
 
-    const double p = alpha + beta;
-    const double q = alpha * beta / p;
-    const double ABx = Ax - Bx;
+    if (i > MAX_L_CPU || j > MAX_L_CPU || i + j >= MAX_E_CPU) {
+        throw std::runtime_error("Hermite E angular momentum too large");
+    }
 
-    std::vector<std::vector<std::vector<double>>> E(
-        i + 1,
-        std::vector<std::vector<double>>(
-            j + 1,
-            std::vector<double>(max_t + 2, 0.0)
-        )
-    );
+    double E[MAX_L_CPU + 1][MAX_L_CPU + 1][MAX_E_CPU];
 
-    E[0][0][0] = std::exp(-q * ABx * ABx);
+    for (int a = 0; a <= MAX_L_CPU; ++a)
+        for (int b = 0; b <= MAX_L_CPU; ++b)
+            for (int t = 0; t < MAX_E_CPU; ++t)
+                E[a][b][t] = 0.0;
+
+    double p = alpha + beta;
+    double q = alpha * beta / p;
+    double AB = A - B;
+
+    E[0][0][0] = std::exp(-q * AB * AB);
 
     for (int ia = 1; ia <= i; ++ia) {
         for (int tt = 0; tt <= ia; ++tt) {
             double term1 = (tt > 0) ? E[ia - 1][0][tt - 1] / (2.0 * p) : 0.0;
-            double term2 = -(beta / p) * ABx * E[ia - 1][0][tt];
-            double term3 = (tt + 1) * E[ia - 1][0][tt + 1];
+            double term2 = -(beta / p) * AB * E[ia - 1][0][tt];
+            double term3 = (tt + 1 < MAX_E_CPU) ? (tt + 1) * E[ia - 1][0][tt + 1] : 0.0;
 
             E[ia][0][tt] = term1 + term2 + term3;
         }
@@ -315,23 +313,21 @@ std::vector<double> hermite_E_array(
         for (int jb = 1; jb <= j; ++jb) {
             for (int tt = 0; tt <= ia + jb; ++tt) {
                 double term1 = (tt > 0) ? E[ia][jb - 1][tt - 1] / (2.0 * p) : 0.0;
-                double term2 = +(alpha / p) * ABx * E[ia][jb - 1][tt];
-                double term3 = (tt + 1) * E[ia][jb - 1][tt + 1];
+                double term2 = +(alpha / p) * AB * E[ia][jb - 1][tt];
+                double term3 = (tt + 1 < MAX_E_CPU) ? (tt + 1) * E[ia][jb - 1][tt + 1] : 0.0;
 
                 E[ia][jb][tt] = term1 + term2 + term3;
             }
         }
     }
 
-    std::vector<double> result(max_t + 1);
-
-    for (int tt = 0; tt <= max_t; ++tt) {
-        result[tt] = E[i][j][tt];
+    std::vector<double> out(i + j + 1);
+    for (int tt = 0; tt <= i + j; ++tt) {
+        out[tt] = E[i][j][tt];
     }
 
-    return result;
+    return out;
 }
-
 
 
 inline constexpr int max_l = 3;                  // up to f

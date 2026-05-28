@@ -1,0 +1,40 @@
+{
+    "basis_path": "/home/jc6224/hf_cpp/basis",
+    "save_path": "/home/jc6224/hf_cpp/data",
+    "folder_name": "ch4_c",
+    "basis": "cc-pVTZ",
+    "charge": 0,
+    "eri_hardware": "CPU",
+
+    "atoms": [
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [0.0, 0.0, 0.0]
+        },
+
+        {
+            "symbol": "H",
+            "coordinate_type": "polar",
+            "position": [2.052, 0.0, 0.0]
+        },
+
+        {
+            "symbol": "H",
+            "coordinate_type": "polar",
+            "position": [2.052, 109.471, 0.0]
+        },
+
+        {
+            "symbol": "H",
+            "coordinate_type": "polar",
+            "position": [2.052, 109.471, 120.0]
+        },
+
+        {
+            "symbol": "H",
+            "coordinate_type": "polar",
+            "position": [2.052, 109.471, 240.0]
+        }
+    ]
+}

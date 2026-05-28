@@ -1,0 +1,21 @@
+{
+    "basis_path": "/home/jc6224/hf_cpp/basis",
+    "save_path": "/home/jc6224/hf_cpp/data",
+    "folder_name": "mgo_c",
+    "basis": "cc-pVTZ",
+    "charge": 0,
+    "eri_hardware": "CPU",
+
+    "atoms": [
+        {
+            "symbol": "Mg",
+            "coordinate_type": "cartesian",
+            "position": [0.0, 0.0, 0.0]
+        },
+        {
+            "symbol": "O",
+            "coordinate_type": "cartesian",
+            "position": [3.31, 0.0, 0.0]
+        }
+    ]
+}

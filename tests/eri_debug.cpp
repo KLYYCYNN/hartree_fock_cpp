@@ -125,18 +125,18 @@ void print_top_eri_differences(const std::vector<double>& eri_cpu,
 int main(){
 
     std::vector<std::pair<std::string, vector3>> 
-    config = {{"C", position_vector(0.0, 0.0, 0.0)},
-              {"O", position_vector(2.196, 0.0, 0.0)},
-              {"O", position_vector(-2.196, 0.0, 0.0)}};
+    config = {{"Be", position_vector(0.0, 0.0, 0.0)},
+              {"H", position_vector(2.52, 0.0, 0.0)},
+              {"H", position_vector(-2.52, 0.0, 0.0)}};
 
     std::pair<std::vector<basis_function>, basis_info> 
-    basis = basis_construction(config, "cc-pVDZ", "/home/jc6224/hf_cpp/basis");
+    basis = basis_construction(config, "cc-pVTZ", "/home/jc6224/hf_cpp/basis");
 
     std::vector<double> eri_cpu = repulsion_tensor(basis.first, 1e-8);
     std::vector<double> eri_gpu = ERI_GPU(basis.first, 1e-8);
 
 
-    print_top_eri_differences(eri_cpu, eri_gpu, basis.second);
+    print_top_eri_differences(eri_cpu, eri_gpu, basis.second, 50);
 
     return 0;
 }

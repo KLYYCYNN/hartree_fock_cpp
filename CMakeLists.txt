@@ -72,4 +72,7 @@ target_link_libraries(test2 hf_core)
 
 add_executable(debug tests/eri_debug.cpp cuda/src/eri.cu)
 target_link_libraries(debug hf_core)
+
+add_executable(test3 tests/test3.cpp cuda/src/eri.cu)
+target_link_libraries(test3 hf_core)
 #---------------------------------------------------

@@ -10,13 +10,14 @@ The GPU implementation is currently undergoing a major redesign. Previously, ele
 
 I am currently working on parallelizing ERI computation down to the primitive Gaussian level. This approach is significantly more GPU-friendly, reduces both memory usage and computational stress on individual threads, and should lead to meaningful acceleration compared to the CPU implementation.
 
+
 To disable GPU support and use a pure CPU implementation, remove:
 
 ```cpp
 #include "eri_gpu.hpp"
 ```
 
-and all calls to GPU-related functions such as `ERI_GPU` and `ERI_tensor` in `scf.hpp`.
+and all calls to GPU-related functions such as `ERI_GPU` and `ERI_tensor` in `scf.hpp`. Also, edit `CMakeLists.txt` to omit the compilation of `.cu` files when building executables.
 
 ---
 
