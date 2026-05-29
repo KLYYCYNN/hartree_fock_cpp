@@ -5,19 +5,9 @@ This project was created to improve my understanding and practical experience wi
 
 ## Current Status
 
-### CUDA Update
-The GPU implementation is currently undergoing a major redesign. Previously, electron repulsion integral (ERI) computation was parallelized only at the basis-function level, which provided little to no acceleration compared to the CPU implementation on an Intel i9-14900K and NVIDIA RTX 5090 system.
+### UHF development
 
-I am currently working on parallelizing ERI computation down to the primitive Gaussian level. This approach is significantly more GPU-friendly, reduces both memory usage and computational stress on individual threads, and should lead to meaningful acceleration compared to the CPU implementation.
-
-
-To disable GPU support and use a pure CPU implementation, remove:
-
-```cpp
-#include "eri_gpu.hpp"
-```
-
-and all calls to GPU-related functions such as `ERI_GPU` and `ERI_tensor` in `scf.hpp`. Also, edit `CMakeLists.txt` to omit the compilation of `.cu` files when building executables.
+I am currently working on the final planned technical upgrade: the addition of a `uhf_solver` function in `scf.hpp`. This implementation will use separate spin-up and spin-down density matrices, enabling the simulation of open-shell systems. On-the-fly Fock matrix construction is not currently planned, as the available system memory is sufficient for ERI tensors whose computation would already require prohibitively long wall times (typically exceeding 24 hours)..
 
 ---
 
@@ -73,6 +63,45 @@ These files allow full reconstruction of the basis set and wavefunction data for
 A separate output structure for multiple SCF runs (e.g. bond-length scans) is planned for future development.
 
 ---
+## Computation of two-electron integrals on different hardwares
+### GPU acceleration benchmarking
+Both the CPU and GPU implementations have been validated on a variety of molecular systems using basis sets up to cc-pVTZ. The two implementations produce identical results for all tested molecules, and the computed energies are consistent with literature values and close to the Hartree–Fock limit. 
+
+**Hardware:** Intel i9-14900K, NVIDIA RTX 5090, Ubuntu 24.04.4 LTS  
+**Basis Set:** cc-pVTZ  
+**Benchmark:** Full RHF SCF calculations including ERI construction, Fock matrix construction, diagonalization, and density matrix updates.
+| Molecule | Basis Size | CPU Time (s) | GPU Time (s) | Speedup |
+|----------|------------|--------------|--------------|----------|
+| $\mathrm{CH}_4$ | $\;\;\;\;$ 95 |$\;\;\;\;\;$ 352|$\;\;\;\;\,$ 134|$\;\;$ X 2.63|
+|$\mathrm{Cl}_2$|$\;\;\;\,\,$ 78|$\;\;\;\;\,$ 2301|$\;\;\;\;\;$ 251|$\,\,\,\,$ X 9.17|
+|$\mathrm{MgO}$|$\;\;\;\;$ 74|$\;\;\;\;\,$ 1185|$\;\;\;\;\;$ 161|$\;\;\,$ X 7.36|
+|$\mathrm{CO}_2$|$\;\;\;\,$ 105|$\;\;\;\;\;$ 2018|$\;\;\;\;\;\,$ 520|$\;\;\;$ X 3.88|
+|$\mathrm{NH}_3$|$\;\;\;\;\;$ 80|$\;\;\;\;\;\;$ 207|$\;\;\;\;\;\;\,$ 76|$\;\;\;\,$ X 2.59|
+|$\mathrm{NaF}$|$\;\;\;\;\;$ 74|$\;\;\;\;\;\,$ 1180|$\;\;\;\;\;\;$ 159|$\;\;\;\;$ X 7.42|
+| $\mathrm{NaCl}$|$\;\;\;\;\,\,$ 78|$\;\;\;\;\;\;$ 2525|$\;\;\;\;\;\;\,$ 268|$\;\;\;\,\,$ X 9.42|
+|$\mathrm{SO}_2$|$\;\;\;\;\,$ 109|$\;\;\;\;\;\;$ 3883|$\;\;\;\;\;\;\,$ 609|$\;\;\;\;\,$ X 6.38|
+
+The reported timings correspond to complete SCF calculations rather than isolated ERI tensor construction. In practice, ERI evaluation dominates the computational cost for these systems, while all remaining SCF steps combined (Fock matrix assembly, matrix diagonalization, density matrix construction, convergence checks, and related operations) typically require only 0.5-5 seconds per calculation.
+
+## Running CPU-only
+If CUDA is unavailable, the code can be compiled and executed in CPU-only mode. To do so:
+
+1. Remove lines such as
+
+```cpp
+#include "eri_gpu.hpp"
+```
+
+from `scf.hpp`.
+
+2. Remove all calls to GPU-related functions such as `ERI_GPU` and `ERI_tensor` in `scf.hpp`.
+
+3. Edit `CMakeLists.txt` to:
+   - exclude all `.cu` source files from compilation,
+   - remove the `find_package(CUDAToolkit REQUIRED)` dependency,
+   - omit any CUDA-related target linking.
+
+The resulting executable will use the CPU implementation exclusively.
 
 ## Visualization
 
@@ -99,20 +128,5 @@ A `.cube` file can then be generated using:
 - the `cube_data` output type
 - the function `write_cube_file`
 
-GPU acceleration is available for 3D electron-density evaluation through `density3d_gpu`, which significantly improves performance by parallelizing evaluations over spatial grid points.
+GPU acceleration is available for 3D electron-density evaluation through `density3d_gpu`, which significantly improves performance by parallelizing evaluations over spatial grid points. `.cube` files can be used to plot isosurfaces in softwares such as VMD, PyMOL and Avogadro.
 
----
-
-## Goals
-The current codebase is a partially optimized CPU implementation of Restricted Hartree–Fock (RHF).
-
-Existing optimizations include:
-- matrix symmetry exploitation
-- ERI tensor symmetry
-- Schwarz screening for ERI evaluation
-
-Future goals include:
-- completing primitive-level GPU parallelization for ERI computation
-- achieving significant GPU acceleration over the CPU implementation
-- extending `scf.hpp` and related data structures to support Unrestricted Hartree–Fock (UHF)
-- supporting open-shell systems such as $\mathrm{O}_2$
