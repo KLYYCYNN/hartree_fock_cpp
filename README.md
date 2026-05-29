@@ -71,15 +71,15 @@ Both the CPU and GPU implementations have been validated on a variety of molecul
 **Basis Set:** cc-pVTZ  
 **Benchmark:** Full RHF SCF calculations including ERI construction, Fock matrix construction, diagonalization, and density matrix updates.
 | Molecule | Basis Size | CPU Time (s) | GPU Time (s) | Speedup |
-|----------|------------|--------------|--------------|----------|
-| $\mathrm{CH}_4$ | $\;\;\;\;$ 95 |$\;\;\;\;\;$ 352|$\;\;\;\;\,$ 134|$\;\;$ X 2.63|
-|$\mathrm{Cl}_2$|$\;\;\;\,\,$ 78|$\;\;\;\;\,$ 2301|$\;\;\;\;\;$ 251|$\,\,\,\,$ X 9.17|
-|$\mathrm{MgO}$|$\;\;\;\;$ 74|$\;\;\;\;\,$ 1185|$\;\;\;\;\;$ 161|$\;\;\,$ X 7.36|
-|$\mathrm{CO}_2$|$\;\;\;\,$ 105|$\;\;\;\;\;$ 2018|$\;\;\;\;\;\,$ 520|$\;\;\;$ X 3.88|
-|$\mathrm{NH}_3$|$\;\;\;\;\;$ 80|$\;\;\;\;\;\;$ 207|$\;\;\;\;\;\;\,$ 76|$\;\;\;\,$ X 2.59|
-|$\mathrm{NaF}$|$\;\;\;\;\;$ 74|$\;\;\;\;\;\,$ 1180|$\;\;\;\;\;\;$ 159|$\;\;\;\;$ X 7.42|
-| $\mathrm{NaCl}$|$\;\;\;\;\,\,$ 78|$\;\;\;\;\;\;$ 2525|$\;\;\;\;\;\;\,$ 268|$\;\;\;\,\,$ X 9.42|
-|$\mathrm{SO}_2$|$\;\;\;\;\,$ 109|$\;\;\;\;\;\;$ 3883|$\;\;\;\;\;\;\,$ 609|$\;\;\;\;\,$ X 6.38|
+|:-|:-:|:-:|:-:|-:|
+| $\mathrm{CH}_4$ | 95 | 352 | 134 | X 2.63 |
+| $\mathrm{Cl}_2$ | 78 | 2301 | 251 | X 9.17 |
+| $\mathrm{MgO}$ | 74 | 1185 | 161 | X 7.36 |
+| $\mathrm{CO}_2$ | 105 | 2018 | 520 | X 3.88 |
+| $\mathrm{NH}_3$ | 80 | 207 | 76 | X 2.59 |
+| $\mathrm{NaF}$ | 74 | 1180 | 159 | X 7.42 |
+| $\mathrm{NaCl}$ | 78 | 2525 | 268 | X 9.42 |
+| $\mathrm{SO}_2$ | 109 | 3883 | 609 | X 6.38 |
 
 The reported timings correspond to complete SCF calculations rather than isolated ERI tensor construction. In practice, ERI evaluation dominates the computational cost for these systems, while all remaining SCF steps combined (Fock matrix assembly, matrix diagonalization, density matrix construction, convergence checks, and related operations) typically require only 0.5-5 seconds per calculation.
 

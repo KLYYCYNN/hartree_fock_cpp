@@ -75,13 +75,44 @@ double repulsion_energy(const std::vector<atom>& molecule){
 }
 
 
+std::vector<double> update_damping(const std::vector<double>& new_matrix,
+                                   const std::vector<double>& old_matrix,
+                                   double damping)
+{
+
+    int n1 = static_cast<int>(new_matrix.size());
+    int n2 = static_cast<int>(old_matrix.size());
+
+    if (n1 != n2){
+        throw runtime_error(R"(DimensionError: dimension inconsistency
+                            encountered when updating density matrix)")
+    }
+
+    std::vector<double> updated_matrix(n1);
+
+    for (int i = 0; i < n1; ++i){
+
+        updated_matrix[i] = damping * new_matrix[i]
+                            + (1 - damping) * old_matrix[i];
+
+    }
+
+    return updated_matrix;
+}
+
+
 std::string 
 formatTimeC20(std::chrono::high_resolution_clock::time_point tp) {
     // Cast high_resolution_clock to system_clock to get calendar time
-    auto sys_tp = std::chrono::clock_cast<std::chrono::system_clock>(tp);
+    auto sys_tp = 
+    std::chrono::clock_cast<std::chrono::system_clock>(tp);
     
-    // %T = 24-hour time with seconds (HH:MM:SS), %d/%m/%y = dd/mm/yy
-    return std::format("{:%T %d/%m/%y}", sys_tp);
+    // Drop the sub-seconds by casting to whole seconds
+    auto whole_secs = 
+    std::chrono::time_point_cast<std::chrono::seconds>(sys_tp);
+    
+    // %T = 24-hour time with integer seconds (HH:MM:SS), %d/%m/%y = dd/mm/yy
+    return std::format("{:%T %d/%m/%y}", whole_secs);
 }
 
 
@@ -288,3 +319,223 @@ scf_cycle(const std::vector<std::pair<std::string, vector3>>& config,
     return output; 
 }
 
+
+uhf_data
+uhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
+          std::string basis_set,
+          std::string param_path,
+          std::pair<int, int> spin_occ,
+          int charge = 0,
+          std::string eri_device = "CPU", 
+          bool set_initial_density = false,
+          std::vector<double> Pa0 = {},
+          std::vector<double> Pb0 = {},
+          int max_it = 10000, 
+          double epsilon = 1e-6,
+          double damping = 0.3,
+          double screening_threshold = 1e-8)
+{
+    //start timing and initialize variables
+    auto t0 = std::chrono::high_resolution_clock::now();                                                            
+    std::cout << "\rstarting SCF cycle" << std::flush;
+    std::cout << "" <<std::endl;
+
+    if (eri_device != "CPU" && eri_device != "GPU"){
+        throw std::runtime_error("unsupported ERI computing platform");
+    }
+
+    double E_tot = 0.0;
+    double E_ele = 0.0;
+    std::vector<double> Pa;
+    std::vector<double> Pb;
+    std::vector<double> Ca;
+    std::vector<double> Cb;
+    std::vector<double> Ea;
+    std::vector<double> Eb;
+    bool success = false;
+    int n_it = 0;
+
+    //convert input configuration to basis set
+    std::vector<atom> molecule(config.size());
+    int n_electrons = -charge;
+
+    for (int i=0; i<config.size(); ++i){
+
+        molecule[i].Z = nameZ(config[i].first);
+        molecule[i].R = config[i].second;
+        n_electrons += molecule[i].Z;
+
+    }
+
+    if (n_electrons != spin_occ.first + spin_occ.second){
+        throw runtime_error(R"(inconsistency in electron number)")
+    }
+
+    std::pair<std::vector<basis_function>, basis_info> Basis = 
+    basis_construction(config, basis_set, param_path);
+
+    std::vector<basis_function> basis = Basis.first;
+    int nbasis = basis.size();
+
+    // if there is no input initial density matrix
+    // use a zero matrix as initial guess
+    if (set_initial_density){
+
+        if (Pa0.size() != nbasis * nbasis
+            || Pb0.size() != nbasis * nbasis){
+            throw std::runtime_error
+            (R"(initial density matrix dimension 
+             inconsistent with basis size)");
+        }
+
+        Pa = Pa0;
+        Pb = Pb0;
+
+    } else{
+        std::vector<double> zero_vector(nbasis * nbasis, 0.0);
+        Pa = zero_vector;
+        Pb = zero_vector;
+    }
+
+
+    // compute other constants before the iterating process starts; 
+    // nuclear repulsion energy, ERI tensor, overlap matrix and associated
+    // orthogonalization transformations.
+    std::vector<double> H_core = Hcore(molecule, basis);
+    double E_nuc = repulsion_energy(molecule);
+    std::vector<double> S = overlap_matrix(basis);
+    Eigen::MatrixXd X = Xmatrix(S);
+
+
+    auto t1 = std::chrono::high_resolution_clock::now();
+    double prep_time = std::chrono::duration<double>(t1 - t0).count();
+    std::cout << "start calculating ERI tensor elements   "
+                  "time taken:  " << prep_time << " s" << std::endl;
+
+    std::vector<double> ERI;
+
+    if (eri_device == "CPU"){
+        ERI = repulsion_tensor(basis, screening_threshold);
+    }
+
+    if (eri_device == "GPU"){
+        ERI = ERI_GPU(basis, screening_threshold);
+    }
+
+
+    auto t2 = std::chrono::high_resolution_clock::now();
+    double eri_time = std::chrono::duration<double>(t2 - t1).count();
+    std::cout << "" <<std::endl;
+    std::cout << "ERI calculation complete, time taken:  " << 
+                 eri_time << " s" << std::endl;
+
+    for (int i=0; i<max_it; ++i){
+
+        n_it += 1;
+
+        // compute coulomb and exchange matrices
+        std::vector<double> J = coulomb_matrix(Pa, Pb, ERI);
+        std::vector<double> Ka = exchange_matrix(Pa, ERI);
+        std::vector<double> Kb = exchange_matrix(Pb, ERI);
+
+        // build the fock matrices
+        std::vector<double> Fa = fock_matrix_uhf(H_core, J, Ka);
+        std::vector<double> Fb = fock_matrix_uhf(H_core, J, Kb);
+
+        // solve the eigenvalue problem and compute a new density matrix
+        std::pair<std::vector<double>, std::vector<double>> 
+        eig_a = EigProblem(Fa, X);
+        std::pair<std::vector<double>, std::vector<double>> 
+        eig_b = EigProblem(Fb, X);
+
+        Ca = eig_a.first;
+        Cb = eig_b.first;
+        Ea = eig_a.second;
+        Eb = eig_b.second;
+
+        std::vector<double> Pa_new = update_density_uhf(Ca, spin_occ.first);
+        std::vector<double> Pb_new = update_density_uhf(Cb, spin_occ.second);
+        
+        // compute the squared difference with the old density matrix
+        double diff_a = RMSD(Pa, Pa_new);
+        double diff_b = RMSD(Pb, Pb_new);
+        
+        // check the RMSD, if it's small enough then the density matrix 
+        // has converged and the process is terminated.
+        if (diff_a < epsilon && diff_b < epsilon){
+
+            success = true;
+            Pa = Pa_new;
+            Pb = Pb_new;
+            E_ele = energy(Pa, Fa, H_core) 
+                    + energy(Pb, Fb, H_core);
+
+            E_tot = E_ele + E_nuc;
+            std::cout << "" <<std::endl;
+            std::cout << "Convergence criterion met after " << n_it << 
+                          " iterations, energy value: " << 
+                          E_tot << " Hartrees." << std::endl;
+            break;
+        }
+
+
+        if (i == max_it - 1){
+
+            std::cout << "" <<std::endl;
+            std::cout << "Failed to achieve convergence, "
+                      << "RMSD of density matrix elements: "
+                      << diff_a << ", " << diff_b << std::endl;
+
+        }
+
+        // if the density matrix hasn't converged,
+        // update it with damping and start a new iteration.
+        Pa = update_damping(Pa_new, Pa, damping);
+        Pb = update_damping(Pb_new, Pb, damping);
+
+        //keeping track of the time taken
+        auto ti = std::chrono::high_resolution_clock::now();
+        double loop_time = std::chrono::duration<double>(ti - t2).count();
+        std::cout << "\rCycle " << n_it << ":" 
+        << loop_time << " s       " << std::flush;
+
+    }
+
+    auto t3 = std::chrono::high_resolution_clock::now();
+    double total_time = std::chrono::duration<double>(t3 - t0).count();
+
+    uhf_data output;
+    output.K = nbasis;
+    output.basis = Basis.second;
+
+    output.E_ele = E_ele;
+    output.E_nuc = E_nuc;
+    output.E_tot = E_tot;
+
+    output.Pa = Pa;
+    output.Pb = Pb;
+    output.Ca = Ca;
+    output.Cb = Cb;
+    output.Ea = Ea;
+    output.Eb = Eb;
+
+    output.converged = success;
+    output.iterations = n_it;
+
+    output.duration = total_time;
+    output.start = formatTimeC20(t0);
+    output.end = formatTimeC20(t3);
+
+    output.charge = charge;
+    output.system = config;
+    output.Na = spin_occ.first;
+    output.Nb = spin_occ.second;
+    
+    output.hardware = eri_device;
+    output.BasisSet = basis_set;
+    
+    std::cout << "SCF cycle completed, total time taken:  " <<
+                 total_time << " s" << std::endl;
+
+    return output; 
+}

@@ -71,6 +71,39 @@ struct scf_data{
 
 };
 
+
+struct uhf_data{
+
+    std::vector<double> Pa;
+    std::vector<double> Pb;
+    std::vector<double> Ca;
+    std::vector<double> Cb;
+    std::vector<double> Ea;
+    std::vector<double> Eb;
+
+    double E_nuc;
+    double E_ele;
+    double E_tot;
+
+    double duration;
+    std::string start;
+    std::string end;
+    int iterations;
+    bool converged;
+
+    std::vector<std::pair<std::string, 
+    vector3>> system;
+
+    basis_info basis;
+    std::string hardware;
+    std::string BasisSet;
+    int charge;
+    int K;
+    int Na, Nb;
+
+};
+
+
 struct cube_data{
 
     std::vector<double> field;

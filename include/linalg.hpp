@@ -39,6 +39,38 @@ std::vector<double> vec2vec(const Eigen::VectorXd& ev) {
 }
 
 
+std::vector<double> matrix_add(const std::vector<double>& A, 
+                               const std::vector<double>& B)
+{
+    int n1 = static_cast<int>(A.size());
+    int n2 = static_cast<int>(B.size());
+
+    if (n1 != n2){
+        throw runtime_error("Cannot add vectors with difference sizes");
+    }
+
+    std::vector<double> sum(n1);
+
+    for (int i = 0; i < n1; ++ i){
+        sum[i] = A[i] + B[i];
+    }
+
+    return sum;
+}
+
+
+std::vector<double> matrix_scale(const std::vector<double>& A, 
+                                 double lambda)
+{
+
+    int n = static_cast<int> A.size();
+    std::vector<double> B(n);
+
+    for (int i = 0; i < n; ++ i){
+        B[i] = lambda * A[i]
+    }
+
+}
 
 
 //contracts the rank-4 electron interaction tensor with density matrix,
@@ -134,4 +166,138 @@ std::vector<double> update_Pmatrix(const std::vector<double>& C,
         }
     }
     return P;
+}
+
+
+std::vector<double> update_density_uhf(const std::vector<double>& C,
+                                       int n_electron){
+
+    int n_basis = (int) std::sqrt(C.size());
+    int n_occ = n_electron / 2;
+    std::vector<double> P(C.size());
+
+    for (int i=0; i<n_basis; ++i){
+        for (int j=0; j<n_basis; ++j){
+            for (int k=0; k<n_occ; ++k){
+
+                P[index2d(i, j, n_basis)] +=
+                C[index2d(i, k, n_basis)] *
+                C[index2d(j, k, n_basis)];
+            }
+        }
+    }
+    return P;
+}
+
+
+std::vector<double> 
+coulomb_matrix(const std::vector<double>& density_matrix,
+               const std::vector<double>& ERI)
+{
+    int K4 = static_cast<int>(ERI.size());
+    int K2 = static_cast<int>(density_matrix.size());
+    int K = static_cast<int>(std::sqrt(K2));
+
+    if (K2 * K2 != K4){
+        throw runtime_error(R"(DimensionError: mismatch between
+                               density matrix and ERI sizes)");
+    }
+
+    std::vector<double> J_matrix(K2, 0.0);
+
+    for (int i = 0; i < K; ++i){
+        for (int j = 0; j < K; ++j){
+            for (int k = 0; k < K; ++k){
+                for (int l = 0; l < K; ++l){
+
+                    J_matrix[index2d(i, j, K)] += 
+                    density_matrix[index2d(k, l, K)]
+                    * ERI[index4d(i, j, k, l, K)];
+
+                }
+            }
+        }
+    }
+
+    return J_matrix;
+}
+
+
+std::vector<double> 
+exchange_matrix(const std::vector<double>& density1,
+                const std::vector<double>& density2,
+                const std::vector<double>& ERI)
+{
+    int K4 = static_cast<int>(ERI.size());
+    int K2 = static_cast<int>(density_matrix.size());
+    int K = static_cast<int>(std::sqrt(K2));
+
+    if (K2 * K2 != K4){
+        throw runtime_error(R"(DimensionError: mismatch between
+                               density matrix and ERI sizes)");
+    }
+
+    std::vector<double> K_matrix(K2, 0.0);
+
+    for (int i = 0; i < K; ++i){
+        for (int j = 0; j < K; ++j){
+            for (int k = 0; k < K; ++k){
+                for (int l = 0; l < K; ++l){
+
+                    K_matrix[index2d(i, j, K)] += 
+                    (density1[index2d(k, l, K)] + 
+                     density2[index2d(k, l, K)])
+                    * ERI[index4d(i, k, j, l, K)];
+
+                }
+            }
+        }
+    }
+
+    return K_matrix;
+}
+
+
+double RMSD(const std::vector<double>& A, 
+            const std::vector<double>& B)
+{
+    int n1 = static_cast<int>(A.size());
+    int n2 = static_cast<int>(B.size());
+
+    if (n1 != n2){
+        throw runtime_error("vectors have different sizes");
+    }
+
+    double tot_diff2 = 0.0;
+
+    for (int i = 0; i < n1; ++i){
+        double diff = A[i] - B[i];        
+        tot_diff2 += diff * diff;
+    }
+
+    return std::sqrt(tot_diff2) / n1;
+}
+
+
+std::vector<double> fock_matrix_uhf(const std::vector<double>& core_ham,
+                                    const std::vector<double>& coulomb
+                                    const std::vector<double>& exchange)
+{
+    int n1 = static_cast<int>(core_ham.size());
+    int n2 = static_cast<int>(coulomb.size());
+    int n3 = static_cast<int>(exchange.size());
+
+    if (n1 != n2 || n1 != n3 || n2 != n3){
+        throw runtime_error(R"(DimensionError: matrix dimension
+                            inconsistency encountered when building
+                            the fock matrix)")
+    }
+
+    std::vector<double> fock(n1);
+
+    for (int i = 0; i < n1; ++i){
+        fock[i] = core_ham[i] + coulomb[i] - exchange[i]
+    }
+
+    return fock;
 }
