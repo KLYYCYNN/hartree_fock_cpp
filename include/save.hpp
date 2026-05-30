@@ -14,8 +14,10 @@ void save_csv(const std::vector<std::vector<double>>& data,
               std::vector<std::string> column_headers,
               std::string fileName) {
 
-    assert (column_headers.size() == data.size() && 
-            "Headers don't match the columns.");
+    if (column_headers.size() != data.size()){
+        throw std::runtime_error(R"(number of columns is different
+                                from number of headers)");
+    }
 
     rapidcsv::Document doc;
 
@@ -121,8 +123,8 @@ void save_basis(const basis_info& info, std::string folder)
 
 
 inline
-void save_metadata(std::string folder,
-                   scf_data data, 
+void rhf_metadata(std::string folder,
+                   rhf_data data, 
                    std::string method, 
                    std::string unit)
 {
@@ -200,9 +202,9 @@ void save_geometry(std::vector<std::pair<std::string, vector3>> config,
 }
 
 inline
-void save_scf_data(std::string path,
+void save_rhf_data(std::string path,
                    std::string folder_name,
-                   scf_data data,
+                   rhf_data data,
                    std::string method = "RHF",
                    std::string unit = "Bohr")
 {
@@ -210,7 +212,7 @@ void save_scf_data(std::string path,
     std::string folder = path + "/" + folder_name;
     create_folder(folder);
 
-    save_metadata(folder, data, method, unit);
+    rhf_metadata(folder, data, method, unit);
 
     save_csv({data.density}, {"density_matrix"},
               folder + "/" + "density.csv");
@@ -223,6 +225,87 @@ void save_scf_data(std::string path,
 
     save_basis(data.basis, folder);
     save_geometry(data.system, folder);
+
+    std::cout << "Data successfully saved." << std::endl;
+}
+
+
+inline
+void uhf_metadata(std::string folder,
+                  uhf_data data, 
+                  std::string method, 
+                  std::string unit)
+{
+
+    std::string path = folder + "/metadata.json";
+
+    std::vector<std::pair<std::string, vector3>>
+    config = data.system;
+    std::vector<std::string> atom_list;
+
+    for (int i = 0; i < config.size(); ++ i){
+        atom_list.emplace_back(config[i].first);
+    }
+
+    nlohmann::ordered_json metadata;
+    metadata["method"] = method;
+    metadata["basis"] = data.BasisSet;
+    metadata["n_basis"] = data.K;
+    metadata["unit"] = unit;
+    metadata["n_iterations"] = data.iterations;
+    metadata["converged"] = data.converged;
+    metadata["ERI_hardware"] = data.hardware;
+
+    metadata["system"] = formatElementCounts(atom_list);
+    metadata["charge_e"] = data.charge;
+    metadata["alpha_occupancy"] = data.Na;
+    metadata["beta_occupancy"] = data.Nb;
+    metadata["electronic_energy"] = data.E_ele;
+    metadata["nuclear_energy"] = data.E_nuc;
+    metadata["total_energy"] = data.E_tot;
+
+    metadata["start_time"] = data.start;
+    metadata["finish_time"] = data.end;
+    metadata["duration_s"] = data.duration;
+
+    std::ofstream file(path);
+    if (file.is_open()){
+        file << metadata.dump(4);
+        file.close();
+    } else{
+        std::cout << "metadata writing failed." << std::endl;
+    }
+
+}
+
+
+
+inline
+void save_uhf_data(std::string path,
+                   std::string folder_name,
+                   uhf_data data,
+                   std::string method = "UHF",
+                   std::string unit = "Bohr")
+{
+
+    std::string folder = path + "/" + folder_name;
+    create_folder(folder);
+
+    uhf_metadata(folder, data, method, unit);
+
+    save_csv({data.Pa, data.Pb},
+             {"density_alpha", "density_beta"},
+             folder + "/" + "density.csv");
+
+    save_csv({data.Ca, data.Cb},
+             {"coefficient_alpha", "coefficient_beta"},
+             folder + "/" + "coefficient.csv");
+             
+    save_basis(data.basis, folder);
+    save_geometry(data.system, folder);
+    save_csv({data.Ea, data.Eb},
+             {"e_a", "e_b"},
+             folder + "/" + "orbital_energies.csv");
 
     std::cout << "Data successfully saved." << std::endl;
 }

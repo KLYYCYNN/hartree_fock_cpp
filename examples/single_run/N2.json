@@ -1,0 +1,32 @@
+{
+    "method": "UHF",
+    "basis": "cc-pVTZ",
+    "basis_path": "/home/jc6224/hf_cpp/basis",
+    "save_path": "/home/jc6224/hf_cpp/data",
+    "folder_name": "uhf_N2",
+
+    "charge": 0,
+    "spin_occupancy": {
+        "alpha": 7,
+        "beta": 7
+    },
+
+    "eri_hardware": "GPU",
+    "max_iterations": 10000,
+    "epsilon": 1e-6,
+    "damping": 0.3,
+    "screening_threshold": 1e-8,
+
+    "atoms": [
+        {
+            "symbol": "N",
+            "coordinate_type": "cartesian",
+            "position": [0.0, 1.034, 0.0]
+        },
+        {
+            "symbol": "N",
+            "coordinate_type": "cartesian",
+            "position": [0.0, -1.034, 0.0]
+        }
+    ]
+}

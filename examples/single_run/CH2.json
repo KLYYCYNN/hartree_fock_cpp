@@ -1,31 +1,37 @@
 {
+    "method": "UHF",
+    "basis": "cc-pVTZ",
     "basis_path": "/home/jc6224/hf_cpp/basis",
     "save_path": "/home/jc6224/hf_cpp/data",
-    "folder_name": "nh3_c",
-    "basis": "cc-pVTZ",
+    "folder_name": "CH2_triplet",
+
     "charge": 0,
-    "eri_hardware": "CPU",
+    "spin_occupancy": {
+        "alpha": 5,
+        "beta": 3
+    },
+
+    "eri_hardware": "GPU",
+    "max_iterations": 10000,
+    "epsilon": 1e-6,
+    "damping": 0.3,
+    "screening_threshold": 1e-8,
 
     "atoms": [
         {
-            "symbol": "N",
+            "symbol": "C",
             "coordinate_type": "cartesian",
             "position": [0.0, 0.0, 0.0]
         },
         {
             "symbol": "H",
             "coordinate_type": "polar",
-            "position": [1.912, 112.2, 0.0]
+            "position": [2.032, 66.5, 0.0]
         },
         {
             "symbol": "H",
             "coordinate_type": "polar",
-            "position": [1.912, 112.2, 120.0]
-        },
-        {
-            "symbol": "H",
-            "coordinate_type": "polar",
-            "position": [1.912, 112.2, 240.0]
+            "position": [2.032, -66.5, 0.0]
         }
     ]
 }
