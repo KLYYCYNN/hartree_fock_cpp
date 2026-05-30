@@ -47,7 +47,7 @@ struct basis_info{
     std::vector<std::string> atoms;
 };
 
-struct scf_data{
+struct rhf_data{
 
     std::vector<double> density;
     std::vector<double> coefficient;

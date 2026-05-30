@@ -84,8 +84,8 @@ std::vector<double> update_damping(const std::vector<double>& new_matrix,
     int n2 = static_cast<int>(old_matrix.size());
 
     if (n1 != n2){
-        throw runtime_error(R"(DimensionError: dimension inconsistency
-                            encountered when updating density matrix)")
+        throw std::runtime_error(R"(DimensionError: dimension inconsistency
+                            encountered when updating density matrix)");
     }
 
     std::vector<double> updated_matrix(n1);
@@ -116,18 +116,18 @@ formatTimeC20(std::chrono::high_resolution_clock::time_point tp) {
 }
 
 
-scf_data
-scf_cycle(const std::vector<std::pair<std::string, vector3>>& config,
-          std::string basis_set,
-          std::string param_path,
-          int charge = 0,
-          std::string eri_device = "CPU", 
-          bool set_initial_density = false,
-          std::vector<double> P0 = {},
-          int max_it = 10000, 
-          double epsilon = 1e-6,
-          double damping = 0.3,
-          double screening_threshold = 1e-8)
+rhf_data
+rhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
+           std::string basis_set,
+           std::string param_path,
+           int charge = 0,
+           std::string eri_device = "CPU", 
+           bool set_initial_density = false,
+           std::vector<double> P0 = {},
+           int max_it = 10000, 
+           double epsilon = 1e-6,
+           double damping = 0.3,
+           double screening_threshold = 1e-8)
 {
     //start timing and initialize variables
     auto t0 = std::chrono::high_resolution_clock::now();                                                            
@@ -291,7 +291,7 @@ scf_cycle(const std::vector<std::pair<std::string, vector3>>& config,
     auto t3 = std::chrono::high_resolution_clock::now();
     double total_time = std::chrono::duration<double>(t3 - t0).count();
 
-    scf_data output;
+    rhf_data output;
     output.E = total_energy;
     output.K = nbasis;
     output.basis = Basis.second;
@@ -368,7 +368,7 @@ uhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
     }
 
     if (n_electrons != spin_occ.first + spin_occ.second){
-        throw runtime_error(R"(inconsistency in electron number)")
+        throw std::runtime_error(R"(inconsistency in electron number)");
     }
 
     std::pair<std::vector<basis_function>, basis_info> Basis = 
@@ -539,3 +539,4 @@ uhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
 
     return output; 
 }
+
