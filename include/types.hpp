@@ -53,10 +53,11 @@ struct rhf_data{
     std::vector<double> coefficient;
     std::vector<double> mo_energy;
 
-    double E;
+    double E_tot, E_ele, E_nuc;
     double duration;
     std::string start;
     std::string end;
+    int Ne;
     int iterations;
     bool converged;
 
@@ -123,6 +124,53 @@ struct square{
     // to one of the sides
 
 };
+
+
+struct blscan_data{
+
+    std::vector<double> distances;
+    std::vector<double> energies;
+    std::vector<double> homo_energies;
+    std::vector<double> lumo_energies;
+    std::vector<double> iterations;
+
+    std::string method, basis, system;
+    int n_points;
+    int K;
+    double min_d, max_d;
+    std::string start, end;
+    double duration;
+
+};
+
+
+struct disstn_data{
+
+    std::vector<double> density;
+    std::vector<double> coefficient;
+    std::vector<double> mo_energy;
+
+    double duration;
+    std::string start;
+    std::string end;
+    int Ne;
+
+    std::vector<std::pair<std::string, vector3>>
+    system;
+
+    std::vector<std::string> atoms;
+    std::vector<int> atom_numbers;
+    double energy, disstn_energy;
+    std::vector<double> energies;
+
+    basis_info basis;
+    std::string hardware;
+    std::string BasisSet;
+    int charge;
+    int K;
+};
+
+
 
 //--------------------------------------------------------------------------------
 //some basic function to work with those stucts easier

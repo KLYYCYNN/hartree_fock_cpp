@@ -1,7 +1,7 @@
 #pragma once
-#include <vector>
-#include <string>
+#include <map>
 #include <fstream>
+#include <utility>
 #include <filesystem>
 #include <nlohmann/json.hpp>
 #include "basis.hpp"
@@ -11,7 +11,7 @@
 //save matrices to csv, each nested subvector is a column.
 inline
 void save_csv(const std::vector<std::vector<double>>& data,
-              std::vector<std::string> column_headers,
+              const std::vector<std::string>& column_headers,
               std::string fileName) {
 
     if (column_headers.size() != data.size()){
@@ -150,7 +150,10 @@ void rhf_metadata(std::string folder,
 
     metadata["system"] = formatElementCounts(atom_list);
     metadata["charge_e"] = data.charge;
-    metadata["energy_hartree"] = data.E;
+    metadata["electron_number"] = data.Ne;
+    metadata["total_energy"] = data.E_tot;
+    metadata["electronic_energy"] = data.E_ele;
+    metadata["nuclear_energy"] = data.E_nuc;
 
     metadata["start_time"] = data.start;
     metadata["finish_time"] = data.end;
@@ -308,4 +311,217 @@ void save_uhf_data(std::string path,
              folder + "/" + "orbital_energies.csv");
 
     std::cout << "Data successfully saved." << std::endl;
+}
+
+
+
+inline
+void save_blscan(const blscan_data& data,
+                 const std::string& save_path,
+                 const std::string& folder_name)
+{
+    namespace fs = std::filesystem;
+
+    if (data.distances.size() != data.energies.size() ||
+        data.distances.size() != data.homo_energies.size() ||
+        data.distances.size() != data.lumo_energies.size() ||
+        data.distances.size() != data.iterations.size()) {
+        throw std::runtime_error("blscan_data vector size mismatch");
+    }
+
+    fs::path out_dir = fs::path(save_path) / folder_name;
+    fs::create_directories(out_dir);
+
+    fs::path csv_path = out_dir / "scan_data.csv";
+    fs::path json_path = out_dir / "scan_info.json";
+
+    std::vector<std::string> headers = {"distance", "total_energy",
+                                        "homo_energy", "lumo_energy",
+                                        "iterations"};
+    
+    save_csv({data.distances, data.energies, data.homo_energies, 
+              data.lumo_energies, data.iterations}, 
+              headers, csv_path.string());
+
+    nlohmann::ordered_json info;
+
+    info["system"] = data.system;
+    info["method"] = "RHF";
+    info["basis"] = data.basis;
+    info["basis_size"] = data.K;
+
+    info["n_points"] = data.n_points;
+    info["min_distance"] = data.min_d;
+    info["max_distance"] = data.max_d;
+
+    info["start"] = data.start;
+    info["end"] = data.end;
+    info["duration_seconds"] = data.duration;
+
+    info["files"] = {
+        {"scan_data", "scan_data.csv"}
+    };
+
+    std::ofstream js(json_path);
+
+    if (!js.is_open()) {
+        throw std::runtime_error("Could not open JSON file: " +
+                                 json_path.string());
+    }
+
+    js << std::setw(4) << info << "\n";
+    js.close();
+
+    std::cout << "Bond-length scan saved to: "
+              << out_dir.string() << std::endl;
+}
+
+
+std::pair<std::vector<std::string>, std::vector<int>> 
+countElements(const std::vector<std::string>& input) {
+    // 1. Count frequencies using a map
+    std::map<std::string, int> frequencyMap;
+    for (const auto& element : input) {
+        frequencyMap[element]++;
+    }
+
+    // 2. Prepare output structures
+    std::vector<std::string> uniqueElements;
+    std::vector<int> counts;
+    
+    // Reserve memory to avoid reallocations
+    uniqueElements.reserve(frequencyMap.size());
+    counts.reserve(frequencyMap.size());
+
+    // 3. Populate output vectors
+    for (const auto& pair : frequencyMap) {
+        uniqueElements.push_back(pair.first);
+        counts.push_back(pair.second);
+    }
+
+    return {uniqueElements, counts};
+}
+
+
+inline
+std::pair<int, int> atom_spin_occupancy(const std::string& atom)
+{
+    static const std::unordered_map<std::string,
+                                    std::pair<int, int>> occ = {
+
+        {"H",  {1, 0}},
+        {"He", {1, 1}},
+
+        {"Li", {2, 1}},
+        {"Be", {2, 2}},
+        {"B",  {3, 2}},
+        {"C",  {4, 2}},
+        {"N",  {4, 3}},
+        {"O",  {5, 3}},
+        {"F",  {5, 4}},
+        {"Ne", {5, 5}},
+
+        {"Na", {6, 5}},
+        {"Mg", {6, 6}},
+        {"Al", {7, 6}},
+        {"Si", {8, 6}},
+        {"P",  {8, 7}},
+        {"S",  {9, 7}},
+        {"Cl", {9, 8}},
+        {"Ar", {9, 9}}
+    };
+
+    auto it = occ.find(atom);
+
+    if (it == occ.end()) {
+        throw std::runtime_error(
+            "Spin occupancy not implemented for atom: " + atom
+        );
+    }
+
+    return it->second;
+}
+
+
+inline
+void save_disstn_data(const disstn_data& data,
+                      const std::string& save_path,
+                      const std::string& folder_name)
+{
+    namespace fs = std::filesystem;
+
+    fs::path out_dir = fs::path(save_path) / folder_name;
+    fs::create_directories(out_dir);
+
+    std::string folder = out_dir.string();
+
+    save_geometry(data.system, folder);
+    save_basis(data.basis, folder);
+
+    save_csv(
+        {data.density},
+        {"density"},
+        (out_dir / "density.csv").string()
+    );
+
+    save_csv(
+        {data.coefficient},
+        {"coefficient"},
+        (out_dir / "coefficients.csv").string()
+    );
+
+    save_csv(
+        {data.mo_energy},
+        {"orbital_energy"},
+        (out_dir / "orbital_energies.csv").string()
+    );
+
+    nlohmann::ordered_json info;
+
+    info["method"] = "RHF molecule + UHF atoms";
+    info["basis"] = data.BasisSet;
+    info["basis_size"] = data.K;
+    info["charge"] = data.charge;
+    info["n_electrons"] = data.Ne;
+    info["hardware"] = data.hardware;
+
+    info["molecule_energy"] = data.energy;
+    info["total_atom_energy"] =
+        data.energy + data.disstn_energy;
+
+    info["dissociation_energy_hartree"] = data.disstn_energy;
+    info["dissociation_energy_ev"] = data.disstn_energy * 27.211386245988;
+    info["dissociation_energy_kj_mol"] = data.disstn_energy * 2625.499638;
+
+    info["atoms"] = data.atoms;
+    info["atom_numbers"] = data.atom_numbers;
+    info["atom_energies"] = data.energies;
+
+    info["start"] = data.start;
+    info["end"] = data.end;
+    info["duration_seconds"] = data.duration;
+
+    info["files"] = {
+        {"geometry", "geometry.csv"},
+        {"basis", "basis.csv"},
+        {"density", "density.csv"},
+        {"coefficients", "coefficients.csv"},
+        {"orbital_energies", "orbital_energies.csv"}
+    };
+
+    fs::path json_path = out_dir / "dissociation_info.json";
+
+    std::ofstream js(json_path);
+
+    if (!js.is_open()) {
+        throw std::runtime_error(
+            "Could not open JSON file: " + json_path.string()
+        );
+    }
+
+    js << std::setw(4) << info << "\n";
+    js.close();
+
+    std::cout << "Dissociation data saved to: "
+              << out_dir.string() << std::endl;
 }

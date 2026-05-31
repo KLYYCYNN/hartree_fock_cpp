@@ -1,0 +1,29 @@
+{
+    "basis": "cc-pVDZ",
+    "basis_path": "/home/jc6224/hf_cpp/basis",
+    "save_path": "/home/jc6224/hf_cpp/data",
+    "folder_name": "F2_scan_ccpVDZ_1000",
+
+    "charge": 0,
+
+    "eri_hardware": "GPU",
+    "max_iterations": 10000,
+    "epsilon": 1e-6,
+    "damping": 0.3,
+    "screening_threshold": 1e-8,
+
+    "central_atom": "F",
+
+    "atoms": [
+        {
+            "symbol": "F",
+            "angular_position": [0.0, 0.0]
+        }
+    ],
+
+    "distances": [
+        [1.8, 2.4, 150],
+        [2.4, 2.9, 700],
+        [2.9, 8.0, 152]
+    ]
+}

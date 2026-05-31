@@ -139,7 +139,8 @@ rhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
     }
 
 
-    double total_energy = 0.0;
+    double E_tot = 0.0;
+    double E_ele = 0.0;
     std::vector<double> density_matrix;
     std::vector<double> coeff_matrix;
     std::vector<double> mo_energies;
@@ -192,8 +193,6 @@ rhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
     double E_nuc = repulsion_energy(molecule);
     std::vector<double> S = overlap_matrix(basis);
     Eigen::MatrixXd X = Xmatrix(S);
-
-    std::cout << "constant matrices computed" << std::endl;
 
     auto t1 = std::chrono::high_resolution_clock::now();
     double prep_time = std::chrono::duration<double>(t1 - t0).count();
@@ -253,13 +252,13 @@ rhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
 
             success = true;
             density_matrix = P_new;
-            total_energy = energy(density_matrix, fock_matrix, H_core)
-                           + E_nuc;
+            E_ele = energy(density_matrix, fock_matrix, H_core);
+            E_tot = E_ele + E_nuc;
 
             std::cout << "" <<std::endl;
             std::cout << "Convergence criterion met after " << n_it << 
                           " iterations, energy value: " << 
-                          total_energy << " Hartrees." << std::endl;
+                          E_tot << " Hartrees." << std::endl;
             break;
         }
 
@@ -292,9 +291,12 @@ rhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
     double total_time = std::chrono::duration<double>(t3 - t0).count();
 
     rhf_data output;
-    output.E = total_energy;
+    output.E_tot = E_tot;
+    output.E_ele = E_ele;
+    output.E_nuc = E_nuc;
     output.K = nbasis;
     output.basis = Basis.second;
+    output.Ne = n_electrons;
 
     output.density = density_matrix;
     output.coefficient = coeff_matrix;
@@ -539,4 +541,3 @@ uhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
 
     return output; 
 }
-

@@ -1,0 +1,23 @@
+{
+  "method": "RHF",
+  "basis": "cc-pVTZ",
+  "basis_path": "/home/jc6224/hf_cpp/basis",
+  "save_path": "/home/jc6224/hf_cpp/data",
+  "folder_name": "methanol",
+
+  "charge": 0,
+  "eri_hardware": "GPU",
+  "max_iterations": 10000,
+  "epsilon": 1e-6,
+  "damping": 0.3,
+  "screening_threshold": 1e-8,
+
+  "atoms": [
+    {"symbol": "C", "coordinate_type": "cartesian", "position": [0.0, 0.0, 0.0]},
+    {"symbol": "O", "coordinate_type": "cartesian", "position": [2.692, 0.0, 0.0]},
+    {"symbol": "H", "coordinate_type": "cartesian", "position": [-0.686, 1.884, 0.0]},
+    {"symbol": "H", "coordinate_type": "cartesian", "position": [-0.686, -0.942, 1.632]},
+    {"symbol": "H", "coordinate_type": "cartesian", "position": [-0.686, -0.942, -1.632]},
+    {"symbol": "H", "coordinate_type": "cartesian", "position": [3.605, 1.488, 0.0]}
+  ]
+}

@@ -1,0 +1,51 @@
+{
+    "method": "RHF",
+    "basis": "cc-pVTZ",
+    "basis_path": "/home/jc6224/hf_cpp/basis",
+    "save_path": "/home/jc6224/hf_cpp/data/planar_ccpvtz",
+    "charge": 0,
+    "eri_hardware": "GPU",
+    "max_iterations": 10000,
+    "epsilon": 1e-06,
+    "damping": 0.3,
+    "screening_threshold": 1e-08,
+    "folder_name": "CH2O",
+    "atoms": [
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        {
+            "symbol": "O",
+            "coordinate_type": "cartesian",
+            "position": [
+                2.285,
+                0.0,
+                0.0
+            ]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [
+                -1.101,
+                1.763,
+                0.0
+            ]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [
+                -1.101,
+                -1.763,
+                0.0
+            ]
+        }
+    ]
+}

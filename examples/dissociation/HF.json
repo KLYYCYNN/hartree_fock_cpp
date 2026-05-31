@@ -1,0 +1,16 @@
+{
+    "basis": "cc-pVTZ",
+    "basis_path": "/home/jc6224/hf_cpp/basis",
+    "save_path": "/home/jc6224/hf_cpp/data",
+    "folder_name": "HF_dissociation_ccpVTZ",
+    "charge": 0,
+    "eri_hardware": "GPU",
+    "max_iterations": 10000,
+    "epsilon": 1e-6,
+    "damping": 0.3,
+    "screening_threshold": 1e-8,
+    "atoms": [
+        {"symbol": "H", "coordinate_type": "cartesian", "position": [0.0, 0.0, -0.866]},
+        {"symbol": "F", "coordinate_type": "cartesian", "position": [0.0, 0.0, 0.866]}
+    ]
+}

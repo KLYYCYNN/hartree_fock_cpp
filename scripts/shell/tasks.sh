@@ -2,11 +2,20 @@
 
 set -e
 
-TARGET="uhf_test"
+TARGET="single_run"
 
 # Put JSON input files here
 INPUTS=(
-    "examples/single_run/Na.json"
+    "examples/single_run/C2H2.json"
+    "examples/single_run/CH2O.json"
+    "examples/single_run/BF3.json"
+    "examples/single_run/BCl3.json"
+    "examples/single_run/SO3.json"
+    "examples/single_run/COCl2.json"
+    "examples/single_run/N2O4.json"
+    "examples/single_run/HNO3.json"
+    "examples/single_run/nitrate_ion.json"
+    "examples/single_run/benzene.json"
 )
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

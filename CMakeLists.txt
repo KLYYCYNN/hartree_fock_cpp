@@ -52,11 +52,19 @@ target_link_libraries(vis INTERFACE
 
 #----------------------------------------------
 
+add_executable(single_run apps/single_run.cpp cuda/src/eri.cu)
+target_link_libraries(single_run hf_core)
+
+add_executable(bl_scan apps/bl_scan.cpp cuda/src/eri.cu)
+target_link_libraries(bl_scan hf_core)
+
+add_executable(dissociation apps/dissociation.cpp cuda/src/eri.cu)
+target_link_libraries(dissociation hf_core)
+
+#----------------------------------------------
+
 add_executable(test tests/test.cpp cuda/src/eri.cu)
 target_link_libraries(test hf_core)
-
-add_executable(H2O tests/H2O.cpp cuda/src/eri.cu)
-target_link_libraries(H2O hf_core)
 
 add_executable(2dslice tests/2dslice.cpp cuda/src/visual.cu)
 target_link_libraries(2dslice hf_core)

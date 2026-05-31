@@ -1,0 +1,42 @@
+{
+    "method": "RHF",
+    "basis": "cc-pVDZ",
+    "basis_path": "/home/jc6224/hf_cpp/basis",
+    "save_path": "/home/jc6224/hf_cpp/data",
+    "folder_name": "CH4_scan_ccpVDZ",
+
+    "charge": 0,
+
+    "eri_hardware": "GPU",
+    "max_iterations": 10000,
+    "epsilon": 1e-6,
+    "damping": 0.3,
+    "screening_threshold": 1e-8,
+
+    "central_atom": "C",
+
+    "atoms": [
+        {
+            "symbol": "H",
+            "angular_position": [54.7356, 0.0]
+        },
+        {
+            "symbol": "H",
+            "angular_position": [54.7356, 120.0]
+        },
+        {
+            "symbol": "H",
+            "angular_position": [54.7356, 240.0]
+        },
+        {
+            "symbol": "H",
+            "angular_position": [180.0, 0.0]
+        }
+    ],
+
+    "distances": [
+        [1.2, 2.0, 60],
+        [2.0, 2.3, 180],
+        [2.3, 6.0, 62]
+    ]
+}

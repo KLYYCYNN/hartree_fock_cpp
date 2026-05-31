@@ -1,0 +1,51 @@
+{
+    "method": "RHF",
+    "basis": "cc-pVTZ",
+    "basis_path": "/home/jc6224/hf_cpp/basis",
+    "save_path": "/home/jc6224/hf_cpp/data/planar_ccpvtz",
+    "charge": 0,
+    "eri_hardware": "GPU",
+    "max_iterations": 10000,
+    "epsilon": 1e-06,
+    "damping": 0.3,
+    "screening_threshold": 1e-08,
+    "folder_name": "C2H2",
+    "atoms": [
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [
+                -3.139,
+                0.0,
+                0.0
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                -1.136,
+                0.0,
+                0.0
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                1.136,
+                0.0,
+                0.0
+            ]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [
+                3.139,
+                0.0,
+                0.0
+            ]
+        }
+    ]
+}
