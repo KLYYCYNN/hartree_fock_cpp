@@ -1,10 +1,7 @@
-#include <cmath>
-#include <functional>
 #include <fstream>
 #include <iomanip>
 #include <stdexcept>
-#include "indexing.hpp"
-#include "basis.hpp"
+#include <functional>
 #include "integrals.hpp"
 #include "visual.hpp"
 #include "save.hpp"
@@ -96,42 +93,15 @@ std::vector<double> electron_density(const std::vector<basis_function>& basis,
 }
 
 
-std::pair<int, int> homo_lumo_indices(
-    const std::vector<double>& orbital_energies,
-    const std::vector<double>& occupations
-) {
-    int K = orbital_energies.size();
-
-    int homo = -1;
-    int lumo = -1;
-
-    for (int i = 0; i < K; ++i) {
-        if (occupations[i] > 1e-8) {
-            if (homo == -1 || orbital_energies[i] > orbital_energies[homo])
-                homo = i;
-        } else {
-            if (lumo == -1 || orbital_energies[i] < orbital_energies[lumo])
-                lumo = i;
-        }
-    }
-
-    if (homo == -1 || lumo == -1)
-        throw std::runtime_error("Could not find HOMO/LUMO");
-
-    return {homo, lumo};
-}
-
-
-std::pair<std::vector<double>, std::vector<double>> 
-homo_lumo_wf(const std::vector<basis_function>& basis,
-             const std::vector<double>& coeff_mat,
-             const std::pair<int, int> indices,
-             const std::vector<vector3>& r)
+std::vector<double>
+orbital_wf(const std::vector<basis_function>& basis,
+           const std::vector<double>& coeff_mat,
+           const int idx,
+           const std::vector<vector3>& r)
 {
 
     int K = basis.size();
-    std::vector<double> homo_r(r.size());
-    std::vector<double> lumo_r(r.size());
+    std::vector<double> psi(r.size());
 
     for (int i = 0; i < r.size(); ++ i){
         std::vector<double> phi(K);
@@ -140,21 +110,15 @@ homo_lumo_wf(const std::vector<basis_function>& basis,
             phi[j] = function_eval(basis[j], r[i]);
         }
 
-        double homo_wf = 0.0;
-        double lumo_wf = 0.0;
-
-        int homo_idx = indices.first;
-        int lumo_idx = indices.second;
+        double wf = 0.0;
 
         for (int j = 0; j < K; ++ j){
 
-            homo_wf += coeff_mat[index2d(j, homo_idx, K)] * phi[j];
-            lumo_wf += coeff_mat[index2d(j, lumo_idx, K)] * phi[j];
+            wf += coeff_mat[index2d(j, idx, K)] * phi[j];
 
         }
         
-        homo_r[i] = homo_wf;
-        lumo_r[i] = lumo_wf;
+        psi[i] = wf;
 
         if (i % 5000 == 0){
 
@@ -167,7 +131,7 @@ homo_lumo_wf(const std::vector<basis_function>& basis,
         }
     }
 
-    return {homo_r, lumo_r};
+    return psi;
 }
 
 
@@ -211,14 +175,31 @@ cube_data density3d(const std::vector<basis_function>& basis,
                     const std::vector<double>& density_matrix,
                     const vector3& center,
                     const double L,
-                    const int resolution)
+                    const int resolution,
+                    std::string renderer = "CPU")
 {
 
+    size_t K = basis.size();
+    if (K * K != density_matrix.size()){
+        throw std::runtime_error(R"(Mismatch between density matrix and
+                                    basis sizes)");
+    }
+
+    if (renderer != "CPU" && renderer != "GPU"){
+        throw std::runtime_error("Unsupported rendering hardware");
+    }
+
     std::vector<vector3> positions = box_points(center, L, resolution);
-    
+    std::vector<double> Psi2;
+
+    if (renderer == "CPU"){
+        Psi2 = electron_density(basis, density_matrix, positions);
+    } else{
+        Psi2 = density_gpu(basis, density_matrix, positions);
+    }
+
     cube_data output;
-    output.field =
-    electron_density(basis, density_matrix, positions);
+    output.field = Psi2;
 
     output.origin = position_vector(center.x - L / 2,
                     center.y - L / 2, center.z - L / 2);
@@ -230,108 +211,112 @@ cube_data density3d(const std::vector<basis_function>& basis,
 
 
 
-std::pair<cube_data, cube_data>
-rhf_3d_homo_lumo(const std::vector<basis_function>& basis,
-                 const std::vector<double>& coeff_mat,
-                 const int n_electron,
-                 const vector3& center,
-                 const double L,
-                 const int res)
-{
-    int K = basis.size();
+void check_index(int idx, int K){
 
-    if (coeff_mat.size() != K * K){
-        throw std::runtime_error
-        ("Coefficient matrix dimension doesn't match basis size.");
+    if (idx < 0 || idx > K){
+        throw std::runtime_error("orbital index out of range");
     }
 
-
-
-    if (n_electron % 2 != 0){
-        throw std::runtime_error("Odd electron number for RHF.");
-    }
-
-
-    std::vector<vector3> positions = box_points(center, L, res);
-
-    std::pair<int, int> indices = {n_electron / 2 - 1, n_electron / 2};
-
-    std::pair<std::vector<double>, std::vector<double>>
-    homo_lumo = homo_lumo_wf(basis, coeff_mat, indices, positions);
-
-    cube_data homo, lumo;
-    homo.field = homo_lumo.first;
-    lumo.field = homo_lumo.second;
-
-    vector3 origin = position_vector(center.x - L / 2,
-                     center.y - L / 2, center.z - L / 2);
-            
-    homo.origin = origin;
-    lumo.origin = origin;
-
-    double dx = L / (res - 1);
-    homo.dx = dx;
-    lumo.dx = dx;
-
-    homo.res = res;
-    lumo.res = res;
-
-    return {homo, lumo};
 }
 
 
-
-std::pair<cube_data, cube_data>
-uhf_3d_homo_lumo(const std::vector<basis_function>& basis,
-                 const std::vector<double>& coeff_mat,
-                 const std::vector<double>& mo_energies,
-                 const std::vector<double>& occupations,
-                 const vector3& center,
-                 const double& L,
-                 const int& res)
+cube_data
+homo_lumo_3d(const std::vector<basis_function>& basis,
+             const std::pair
+             <std::vector<double>, std::vector<double>>& coeff_mats,
+             const std::pair<int, int> occupation,
+             const vector3 center,
+             const double L,
+             const int res,
+             const bool homo_or_lumo = true,
+             const bool alpha_or_beta = true,
+             const std::string renderer = "CPU")
 {
 
     int K = basis.size();
 
-    if (coeff_mat.size() != K * K){
+    std::vector<double> coeff_alpha = coeff_mats.first;
+    std::vector<double> coeff_beta = coeff_mats.second;
+
+    if (coeff_alpha.size() != coeff_beta.size()){
+        throw std::runtime_error
+        ("Coefficient matrices dimension mismatch");
+    }
+
+    if (coeff_alpha.size() != K * K){
         throw std::runtime_error
         ("Coefficient matrix dimension doesn't match basis size.");
     }
-
-    if (mo_energies.size() != K || occupations.size() != K){
-        throw std::runtime_error("Bad HOMO/LUMO occupation input");
-        }
 
     if (res < 2){
         throw std::runtime_error("resolution must be at least 2");
     }
 
-    std::pair<int, int>
-    indices = homo_lumo_indices(mo_energies, occupations);
+    if (renderer != "CPU" && renderer != "GPU"){
+        throw std::runtime_error("unsupported rendering hardware");
+    }
+
+    std::function<std::vector<double>(
+    const std::vector<basis_function>&,
+    const std::vector<double>&,
+    int,
+    const std::vector<vector3>&)> orbital_eval;
+
+    if (renderer == "CPU"){
+        orbital_eval = orbital_wf;
+    } else{
+        orbital_eval = orbital_gpu;
+    }
 
     std::vector<vector3> positions = box_points(center, L, res);
 
-    std::pair<std::vector<double>, std::vector<double>>
-    homo_lumo = homo_lumo_wf(basis, coeff_mat, indices, positions);
+    std::vector<double> psi;
+    int orbital_index;
+    
+    if (homo_or_lumo){
+        if (alpha_or_beta){
 
-    cube_data homo, lumo;
-    homo.field = homo_lumo.first;
-    lumo.field = homo_lumo.second;
+            orbital_index = occupation.first - 1;
+            check_index(orbital_index, K);
+            psi = orbital_eval(basis, coeff_alpha, 
+                               orbital_index, positions);
+
+        } else{
+
+            orbital_index = occupation.second - 1;
+            check_index(orbital_index, K);
+            psi = orbital_eval(basis, coeff_beta, 
+                               orbital_index, positions);
+        }
+    } else{
+        if (alpha_or_beta){
+
+            orbital_index = occupation.first;
+            check_index(orbital_index, K);
+            psi = orbital_eval(basis, coeff_alpha, 
+                               orbital_index , positions);
+
+        } else{
+
+            orbital_index = occupation.second;
+            check_index(orbital_index, K);
+            psi = orbital_eval(basis, coeff_beta, 
+                               orbital_index , positions);
+
+        }
+    }
+
+    cube_data psi_r;
+    psi_r.field = psi;
 
     vector3 origin = position_vector(center.x - L / 2,
                      center.y - L / 2, center.z - L / 2);
-            
-    homo.origin = origin;
-    lumo.origin = origin;
+    
+    psi_r.origin = origin;
+    psi_r.dx = L / (res - 1);
+    psi_r.res = res;
 
-    double dx = L / (res - 1);
-    homo.dx = dx;
-    lumo.dx = dx;
-
-    homo.res = res;
-    lumo.res = res;
-
-    return {homo, lumo};
+    return psi_r;
 }
 
 

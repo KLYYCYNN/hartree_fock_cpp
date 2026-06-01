@@ -1,0 +1,27 @@
+{
+    "method": "RHF",
+    "basis": "cc-pVTZ",
+    "basis_path": "/home/jc6224/hf_cpp/basis",
+    "save_path": "/home/jc6224/hf_cpp/data/organic",
+    "folder_name": "uracil",
+    "charge": 0,
+    "eri_hardware": "GPU",
+    "max_iterations": 10000,
+    "epsilon": 1e-6,
+    "damping": 0.3,
+    "screening_threshold": 1e-8,
+    "atoms": [
+        {"symbol": "O", "coordinate_type": "cartesian", "position": [4.396259, 1.823775, 0.000189]},
+        {"symbol": "O", "coordinate_type": "cartesian", "position": [-4.341079, 1.933568, 0.000945]},
+        {"symbol": "N", "coordinate_type": "cartesian", "position": [0.034015, 1.927332, -0.000378]},
+        {"symbol": "N", "coordinate_type": "cartesian", "position": [2.199074, -1.931489, 0.000189]},
+        {"symbol": "C", "coordinate_type": "cartesian", "position": [2.366693, 0.685782, 0.000000]},
+        {"symbol": "C", "coordinate_type": "cartesian", "position": [-2.327198, 0.782536, -0.000756]},
+        {"symbol": "C", "coordinate_type": "cartesian", "position": [-0.050645, -3.204031, 0.000378]},
+        {"symbol": "C", "coordinate_type": "cartesian", "position": [-2.276931, -2.017472, -0.000378]},
+        {"symbol": "H", "coordinate_type": "cartesian", "position": [0.072188, 3.846915, -0.000189]},
+        {"symbol": "H", "coordinate_type": "cartesian", "position": [3.814790, -2.967248, 0.000756]},
+        {"symbol": "H", "coordinate_type": "cartesian", "position": [-4.052140, -3.035467, -0.000378]},
+        {"symbol": "H", "coordinate_type": "cartesian", "position": [0.088628, -5.246069, 0.000756]}
+    ]
+}

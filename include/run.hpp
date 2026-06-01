@@ -2,13 +2,38 @@
 #include <fstream>
 #include <iostream>
 #include <nlohmann/json.hpp>
-#include "save.hpp"
 #include "scf.hpp"
+#include "save.hpp"
 
 using json = nlohmann::json;
 
+//------------------------------------------------------------------
 
-//---------------------------------------------------------
+void require_key(const json& input, const std::string& key)
+{
+    if (!input.contains(key)) {
+        throw std::runtime_error("Missing required JSON field: " + key);
+    }
+}
+
+
+std::vector<double> linspace(double start, double stop, int npoints){
+    double step = (stop - start) / (npoints - 1);
+    std::vector<double> arrray;
+    for (int i = 0; i < npoints; ++i)
+    {
+        arrray.emplace_back(start + i*step);
+    }
+
+    return arrray;
+}
+
+//------------------------------single_run-----------------------------------
+//oooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooo
+//oooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooo
+//oooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooo
+//------------------------------options struct-------------------------------
+
 struct scf_options {
     std::string method = "RHF";
 
@@ -34,60 +59,7 @@ struct scf_options {
     std::vector<std::pair<std::string, vector3>> config;
 };
 
-
-struct bl_scan_options {
-
-    std::string basis;
-    std::string basis_path;
-    std::string save_path;
-    std::string folder_name = "test";
-
-    int charge = 0;
-
-    int n_alpha = -1;
-    int n_beta = -1;
-
-    std::string eri_device = "CPU";
-
-    int max_it = 10000;
-    double epsilon = 1e-6;
-    double damping = 0.3;
-    double screening_threshold = 1e-8;
-
-    bool set_initial_density = false;
-
-    std::string central_atom;
-
-    // symbol, {theta, phi}
-    std::vector<std::pair<std::string, std::pair<double, double>>> config;
-
-    // {start, stop, n_points}
-    std::vector<std::array<double, 3>> distances;
-};
-
-//---------------------------------------------------------
-
-
-std::vector<double> linspace(double start, double stop, int npoints){
-    double step = (stop - start) / (npoints - 1);
-    std::vector<double> arrray;
-    for (int i = 0; i < npoints; ++i)
-    {
-        arrray.emplace_back(start + i*step);
-    }
-
-    return arrray;
-}
-//---------------------------------------------------------
-
-void require_key(const json& input, const std::string& key)
-{
-    if (!input.contains(key)) {
-        throw std::runtime_error("Missing required JSON field: " + key);
-    }
-}
-
-//---------------------------------------------------------
+//------------------------------read options------------------------------------
 
 scf_options read_scf_options(const std::string& json_file)
 {
@@ -161,6 +133,90 @@ scf_options read_scf_options(const std::string& json_file)
     return opt;
 }
 
+//-------------------------launch scf--------------------------------
+
+void run_scf_from_options(const scf_options& opt)
+{
+    if (opt.method == "RHF") {
+
+        rhf_data result = rhf_solver(
+            opt.config,
+            opt.basis,
+            opt.basis_path,
+            opt.charge,
+            opt.eri_device,
+            false,
+            {},
+            opt.max_it,
+            opt.epsilon,
+            opt.damping,
+            opt.screening_threshold
+        );
+
+        save_rhf_data(opt.save_path, opt.folder_name, result);
+    }
+    else if (opt.method == "UHF") {
+
+        uhf_data result = uhf_solver(
+            opt.config,
+            opt.basis,
+            opt.basis_path,
+            {opt.n_alpha, opt.n_beta},
+            opt.charge,
+            opt.eri_device,
+            false,
+            {},
+            {},
+            opt.max_it,
+            opt.epsilon,
+            opt.damping,
+            opt.screening_threshold
+        );
+
+        save_uhf_data(opt.save_path, opt.folder_name, result);
+    }
+    else {
+        throw std::runtime_error("Unknown SCF method: " + opt.method);
+    }
+}
+
+//------------------------------bl_scan-----------------------------------
+//oooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooo
+//oooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooo
+//oooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooo
+//----------------------bondlength scan options struct-----------------------
+
+struct bl_scan_options {
+
+    std::string basis;
+    std::string basis_path;
+    std::string save_path;
+    std::string folder_name = "test";
+
+    int charge = 0;
+
+    int n_alpha = -1;
+    int n_beta = -1;
+
+    std::string eri_device = "CPU";
+
+    int max_it = 10000;
+    double epsilon = 1e-6;
+    double damping = 0.3;
+    double screening_threshold = 1e-8;
+
+    bool set_initial_density = false;
+
+    std::string central_atom;
+
+    // symbol, {theta, phi}
+    std::vector<std::pair<std::string, std::pair<double, double>>> config;
+
+    // {start, stop, n_points}
+    std::vector<std::array<double, 3>> distances;
+};
+
+//--------------------------read scan options-------------------------------
 
 bl_scan_options read_blscan_options(const std::string& json_file)
 {
@@ -247,59 +303,8 @@ bl_scan_options read_blscan_options(const std::string& json_file)
 
     return opt;
 }
-//---------------------------------------------------------
 
-
-
-//---------------------------------------------------------
-
-void run_scf_from_options(const scf_options& opt)
-{
-    if (opt.method == "RHF") {
-
-        rhf_data result = rhf_solver(
-            opt.config,
-            opt.basis,
-            opt.basis_path,
-            opt.charge,
-            opt.eri_device,
-            false,
-            {},
-            opt.max_it,
-            opt.epsilon,
-            opt.damping,
-            opt.screening_threshold
-        );
-
-        save_rhf_data(opt.save_path, opt.folder_name, result);
-    }
-    else if (opt.method == "UHF") {
-
-        uhf_data result = uhf_solver(
-            opt.config,
-            opt.basis,
-            opt.basis_path,
-            {opt.n_alpha, opt.n_beta},
-            opt.charge,
-            opt.eri_device,
-            false,
-            {},
-            {},
-            opt.max_it,
-            opt.epsilon,
-            opt.damping,
-            opt.screening_threshold
-        );
-
-        save_uhf_data(opt.save_path, opt.folder_name, result);
-    }
-    else {
-        throw std::runtime_error("Unknown SCF method: " + opt.method);
-    }
-}
-//---------------------------------------------------------
-
-//---------------------------------------------------------
+//-------------------------launch scan--------------------------------
 
 void run_bl_scan(const bl_scan_options& opt)
 {
@@ -426,9 +431,78 @@ void run_bl_scan(const bl_scan_options& opt)
     save_blscan(data, opt.save_path, opt.folder_name);
 }
 
-//oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-//oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-//oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+//------------------------dissociation energy calculator---------------------
+//oooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooo
+//oooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooo
+//oooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooo
+//------------------------------helper functions-----------------------------
+
+std::pair<std::vector<std::string>, std::vector<int>> 
+countElements(const std::vector<std::string>& input) {
+    // 1. Count frequencies using a map
+    std::map<std::string, int> frequencyMap;
+    for (const auto& element : input) {
+        frequencyMap[element]++;
+    }
+
+    // 2. Prepare output structures
+    std::vector<std::string> uniqueElements;
+    std::vector<int> counts;
+    
+    // Reserve memory to avoid reallocations
+    uniqueElements.reserve(frequencyMap.size());
+    counts.reserve(frequencyMap.size());
+
+    // 3. Populate output vectors
+    for (const auto& pair : frequencyMap) {
+        uniqueElements.push_back(pair.first);
+        counts.push_back(pair.second);
+    }
+
+    return {uniqueElements, counts};
+}
+
+
+inline
+std::pair<int, int> atom_spin_occupancy(const std::string& atom)
+{
+    static const std::unordered_map<std::string,
+                                    std::pair<int, int>> occ = {
+
+        {"H",  {1, 0}},
+        {"He", {1, 1}},
+
+        {"Li", {2, 1}},
+        {"Be", {2, 2}},
+        {"B",  {3, 2}},
+        {"C",  {4, 2}},
+        {"N",  {4, 3}},
+        {"O",  {5, 3}},
+        {"F",  {5, 4}},
+        {"Ne", {5, 5}},
+
+        {"Na", {6, 5}},
+        {"Mg", {6, 6}},
+        {"Al", {7, 6}},
+        {"Si", {8, 6}},
+        {"P",  {8, 7}},
+        {"S",  {9, 7}},
+        {"Cl", {9, 8}},
+        {"Ar", {9, 9}}
+    };
+
+    auto it = occ.find(atom);
+
+    if (it == occ.end()) {
+        throw std::runtime_error(
+            "Spin occupancy not implemented for atom: " + atom
+        );
+    }
+
+    return it->second;
+}
+
+//------------------------run dissociation energy calculator---------------------
 
 void run_dissociation(const scf_options& opt){
 
@@ -510,3 +584,30 @@ void run_dissociation(const scf_options& opt){
 
     save_disstn_data(output, opt.save_path, opt.folder_name);
 }
+
+
+//------------------------------2D visualization-----------------------------
+//oooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooo
+//oooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooo
+//oooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooo
+//----------------------visualization options struct-------------------------
+
+struct visual_options{
+
+    int resolution = 512;
+    vector3 center;
+    double side_length;
+    std::string plane = "none";
+
+    std::string dimension = "2D";
+    std::string render_hardware = "CPU";
+    std::string data_path;
+    std::string save_path;
+    bool render_density, render_orbitals;
+
+    
+};
+
+
+
+

@@ -7,7 +7,6 @@
 #include <format>
 #include "integrals.hpp"
 #include "linalg.hpp"
-#include "eri_gpu.hpp"
 
 std::vector<double> Hcore(const std::vector<atom>& molecule,
                           const std::vector<basis_function>& basis){
@@ -39,6 +38,10 @@ double energy(const std::vector<double>& density,
     return 0.5 * E;
 }
 
+std::vector<double> ERI_GPU(
+    const std::vector<basis_function>& basis,
+    double threshold
+);
 
 std::vector<std::pair<int, int>> 
 unique_pairs(const std::vector<int>& vec) {

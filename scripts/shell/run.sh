@@ -3,7 +3,7 @@
 set -e
 
 TARGET="single_run"
-INPUT="examples/single_run/Cl2.json"
+INPUT="examples/single_run/cystosine.json"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"

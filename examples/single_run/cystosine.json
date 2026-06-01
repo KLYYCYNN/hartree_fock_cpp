@@ -1,0 +1,28 @@
+{
+    "method": "RHF",
+    "basis": "cc-pVTZ",
+    "basis_path": "/home/jc6224/hf_cpp/basis",
+    "save_path": "/home/jc6224/hf_cpp/data/organic",
+    "folder_name": "cytosine",
+    "charge": 0,
+    "eri_hardware": "GPU",
+    "max_iterations": 10000,
+    "epsilon": 1e-6,
+    "damping": 0.3,
+    "screening_threshold": 1e-8,
+    "atoms": [
+        {"symbol": "O", "coordinate_type": "cartesian", "position": [4.182720, 2.114226, 0.000189]},
+        {"symbol": "N", "coordinate_type": "cartesian", "position": [-0.112439, 1.854955, 0.000189]},
+        {"symbol": "N", "coordinate_type": "cartesian", "position": [-4.615089, 1.741194, 0.000189]},
+        {"symbol": "N", "coordinate_type": "cartesian", "position": [2.444361, -1.841349, 0.000000]},
+        {"symbol": "C", "coordinate_type": "cartesian", "position": [-2.344394, 0.505691, -0.000189]},
+        {"symbol": "C", "coordinate_type": "cartesian", "position": [-2.200208, -2.026920, -0.000378]},
+        {"symbol": "C", "coordinate_type": "cartesian", "position": [2.284301, 0.766473, -0.000567]},
+        {"symbol": "C", "coordinate_type": "cartesian", "position": [0.360560, -3.113891, 0.000567]},
+        {"symbol": "H", "coordinate_type": "cartesian", "position": [-0.251523, 3.769248, 0.000567]},
+        {"symbol": "H", "coordinate_type": "cartesian", "position": [-3.821593, -3.272439, -0.000567]},
+        {"symbol": "H", "coordinate_type": "cartesian", "position": [0.444275, -5.194290, 0.000945]},
+        {"symbol": "H", "coordinate_type": "cartesian", "position": [-6.252915, 0.752867, 0.000567]},
+        {"symbol": "H", "coordinate_type": "cartesian", "position": [-4.636065, 3.653219, 0.001134]}
+    ]
+}

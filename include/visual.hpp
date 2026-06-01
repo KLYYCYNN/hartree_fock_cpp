@@ -73,6 +73,11 @@ std::vector<double> density_gpu(const std::vector<basis_function>& basis,
                                 const std::vector<vector3>& r);
 
 
+std::vector<double> orbital_gpu(const std::vector<basis_function>& basis,
+                                const std::vector<double>& coeff_mat,
+                                const int index,
+                                const std::vector<vector3>& r);
+
 
 std::vector<double> slice_vector(const std::vector<double>& vec, int start, int end) {
     // Safety check: ensure indices are valid and in order
