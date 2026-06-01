@@ -764,15 +764,15 @@ std::vector<double> repulsion_tensor(const std::vector<basis_function>& basis,
                                      double threshold)
 {                               
     int K = basis.size();
-    int n_pairs = K * (K + 1) / 2;
-    int n_quartets = n_pairs * (n_pairs + 1) / 2;
+    size_t n_pairs = K * (K + 1) / 2;
+    size_t n_quartets = n_pairs * (n_pairs + 1) / 2;
 
-    std::vector<double> ERI(K * K * K * K);
     std::vector<double> bounds = schwarz_bounds(basis);
+    std::vector<double> unique_eri(n_quartets, 0.0);
 
-    for (int i = 0; i < n_quartets; ++ i){
+    for (size_t i = 0; i < n_quartets; ++ i){
 
-        std::pair<int, int> q_idx = pair_to_indices(i);
+        std::pair<int, int> q_idx = quartet_to_pairs(i);
         std::pair<int, int> p1_idx = pair_to_indices(q_idx.first);
         std::pair<int, int> p2_idx = pair_to_indices(q_idx.second);
 
@@ -783,32 +783,7 @@ std::vector<double> repulsion_tensor(const std::vector<basis_function>& basis,
             double val = basis_repulsion(basis[p1_idx.first], basis[p1_idx.second],
                                          basis[p2_idx.first], basis[p2_idx.second]);
 
-
-            ERI[index4d(p1_idx.first, p1_idx.second,
-                        p2_idx.first, p2_idx.second, K)] = val;
-
-            ERI[index4d(p1_idx.second, p1_idx.first,
-                        p2_idx.first, p2_idx.second, K)] = val;
-
-            ERI[index4d(p1_idx.first, p1_idx.second,
-                        p2_idx.second, p2_idx.first, K)] = val;
-
-            ERI[index4d(p1_idx.second, p1_idx.first,
-                        p2_idx.second, p2_idx.first, K)] = val;
-
-
-            ERI[index4d(p2_idx.first, p2_idx.second,
-                        p1_idx.first, p1_idx.second, K)] = val;
-
-            ERI[index4d(p2_idx.second, p2_idx.first,
-                        p1_idx.first, p1_idx.second, K)] = val;
-
-            ERI[index4d(p2_idx.first, p2_idx.second,
-                        p1_idx.second, p1_idx.first, K)] = val;
-
-            ERI[index4d(p2_idx.second, p2_idx.first,
-                        p1_idx.second, p1_idx.first, K)] = val;
-
+            unique_eri[i] = val;
         }
 
         if (i % 5000 == 0 || i == n_quartets - 1) {
@@ -816,5 +791,5 @@ std::vector<double> repulsion_tensor(const std::vector<basis_function>& basis,
             std::cout << "\rERI progress: " << progress << "%      " << std::flush;
         }
     }
-    return ERI;
+    return unique_eri;
 }

@@ -1,10 +1,10 @@
 {
     "basis_path": "/home/jc6224/hf_cpp/basis",
-    "save_path": "/home/jc6224/hf_cpp/data",
-    "folder_name": "cl2_c",
+    "save_path": "/home/jc6224/hf_cpp/data/common_molecules",
+    "folder_name": "G-T-Cl2(1)",
     "basis": "cc-pVTZ",
     "charge": 0,
-    "eri_hardware": "CPU",
+    "eri_hardware": "GPU",
 
     "atoms": [
         {

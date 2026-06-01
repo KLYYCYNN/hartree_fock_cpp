@@ -79,26 +79,28 @@ std::vector<double> matrix_scale(const std::vector<double>& A,
 //compute J and K values and construct the electron-electron interaction matrix
 
 std::vector<double> repulsion_matrix(const std::vector<double>& density_matrix,
-                                     const std::vector<double>& ERI){
+                                     const std::vector<double>& unique_eri){
 
-    int n_basis = (int) pow(density_matrix.size(), 0.5);
+    int n_basis = static_cast<int>
+                  (std::sqrt(static_cast<int>(density_matrix.size())));
+
     std::vector<double> mat(density_matrix.size());
 
     for (int i=0; i<n_basis; ++i){
         for (int j=0; j<n_basis; ++j){
 
-            mat[ index2d(i, j, n_basis) ] = 0.0;
+            mat[index2d(i, j, n_basis)] = 0.0;
 
             for (int k=0; k<n_basis; ++k){
                 for (int l=0; l<n_basis; ++l){
 
                     double J = density_matrix[index2d(k, l, n_basis)] *
-                               ERI[index4d(i, j, k, l, n_basis)];
+                               unique_eri[eri_index(i, j, k, l)];
 
                     double K = density_matrix[index2d(k, l, n_basis)] *
-                               ERI[index4d(i, k, j, l, n_basis)];
+                               unique_eri[eri_index(i, k, j, l)];
 
-                    mat[ index2d(i, j, n_basis) ] += J - 0.5*K;
+                    mat[index2d(i, j, n_basis)] += J - 0.5*K;
 
                 }
             }
@@ -194,17 +196,23 @@ std::vector<double> update_density_uhf(const std::vector<double>& C,
 std::vector<double> 
 coulomb_matrix(const std::vector<double>& density1,
                const std::vector<double>& density2,
-               const std::vector<double>& ERI)
+               const std::vector<double>& unique_eri)
 {
     if (density1.size() != density2.size()){
         throw std::runtime_error("density matrices sizes mismatch");
     }
 
-    int K4 = static_cast<int>(ERI.size());
+    size_t eri_size = unique_eri.size();
     int K2 = static_cast<int>(density1.size());
     int K = static_cast<int>(std::sqrt(K2));
 
-    if (K2 * K2 != K4){
+    if (K * K != K2){
+        throw std::runtime_error("density matrix is not square");
+    }
+
+    size_t n_pairs = K * (K + 1) / 2;
+
+    if (n_pairs * (n_pairs + 1) / 2 != eri_size){
         throw std::runtime_error(R"(DimensionError: mismatch between
                                density matrix and ERI sizes)");
     }
@@ -219,7 +227,7 @@ coulomb_matrix(const std::vector<double>& density1,
                     J_matrix[index2d(i, j, K)] += 
                     (density1[index2d(k, l, K)]
                      + density2[index2d(k, l, K)])
-                    * ERI[index4d(i, j, k, l, K)];
+                    * unique_eri[eri_index(i, j, k, l)];
 
                 }
             }
@@ -232,13 +240,19 @@ coulomb_matrix(const std::vector<double>& density1,
 
 std::vector<double> 
 exchange_matrix(const std::vector<double>& density_matrix,
-                const std::vector<double>& ERI)
+                const std::vector<double>& unique_eri)
 {
-    int K4 = static_cast<int>(ERI.size());
+    size_t eri_size = unique_eri.size();
     int K2 = static_cast<int>(density_matrix.size());
     int K = static_cast<int>(std::sqrt(K2));
 
-    if (K2 * K2 != K4){
+    if (K * K != K2){
+        throw std::runtime_error("density matrix is not square");
+    }
+
+    size_t n_pairs = K * (K + 1) / 2;
+
+    if (n_pairs * (n_pairs + 1) / 2 != eri_size){
         throw std::runtime_error(R"(DimensionError: mismatch between
                                density matrix and ERI sizes)");
     }
@@ -252,7 +266,7 @@ exchange_matrix(const std::vector<double>& density_matrix,
 
                     K_matrix[index2d(i, j, K)] += 
                     density_matrix[index2d(k, l, K)]
-                    * ERI[index4d(i, k, j, l, K)];
+                    * unique_eri[eri_index(i, k, j, l)];
 
                 }
             }

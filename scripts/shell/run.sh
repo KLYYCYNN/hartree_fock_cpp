@@ -2,8 +2,8 @@
 
 set -e
 
-TARGET="dissociation"
-INPUT="examples/dissociation/CH4.json"
+TARGET="single_run"
+INPUT="examples/single_run/Cl2.json"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"

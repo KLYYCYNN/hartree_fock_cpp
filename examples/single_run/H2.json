@@ -11,7 +11,7 @@
         "beta": 1
     },
 
-    "eri_hardware": "CPU",
+    "eri_hardware": "GPU",
     "max_iterations": 10000,
     "epsilon": 1e-6,
     "damping": 0.3,

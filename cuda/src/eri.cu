@@ -1,5 +1,4 @@
 #include "gpu_types.hpp"
-#include "eri_cpu.hpp"
 #include "integrals.hpp"
 #include "kernels.cuh"
 #include <cuda_runtime.h>
@@ -26,8 +25,8 @@ std::vector<double> ERI_GPU(
     std::vector<BasisFunctionGPU> h_basis = convert_basis_to_gpu(basis);
 
     int K = basis.size();
-    int n_pairs = K * (K + 1) / 2;
-    int n_quartets = n_pairs * (n_pairs + 1) / 2;
+    size_t n_pairs = K * (K + 1) / 2;
+    size_t n_quartets = n_pairs * (n_pairs + 1) / 2;
 
     // compute bounds on cpu
     std::vector<double> h_bounds = schwarz_bounds(basis);
@@ -64,7 +63,7 @@ std::vector<double> ERI_GPU(
 
     // set up number of blocks, grids, and the size of shared memory
     int block = 256;
-    int grid = n_quartets;
+    int grid = std::min<size_t>(65535, n_quartets);
     size_t shared_memory = block * sizeof(double);
 
     // launch the kernel to compute all unique eri on GPU
@@ -86,7 +85,7 @@ std::vector<double> ERI_GPU(
     cudaFree(d_bounds);
     cudaFree(d_basis);
 
-    return fill_eri_symmetry(h_eri_unique, K);
+    return h_eri_unique;
 }
 
 
