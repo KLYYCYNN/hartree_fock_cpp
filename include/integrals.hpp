@@ -5,7 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <stdexcept>
-#include <functional>
+
 
 //------------------------OVERLAP---------------------------------
 //using recursive relation to compute 1d overlap involving
@@ -92,14 +92,6 @@ double basis_overlap(const basis_function& f1, const basis_function& f2){
     }
 
     return s;
-}
-
-inline
-std::pair<int, int> pair_to_indices(int pid) {
-
-    int a = int((sqrt(8.0 * pid + 1.0) - 1.0) / 2.0);
-    int b = pid - a * (a + 1) / 2;
-    return {a, b};
 }
 
 

@@ -1,0 +1,32 @@
+{
+    "resolution": 512,
+
+    "center": [0.0, 0.0, 0.0],
+    "side_length": 15.0,
+
+    "plane": "none",
+
+    "dimension": "3D",
+    "render_hardware": "GPU",
+
+    "data_path": "/home/jc6224/hf_cpp/data/planar_ccpvtz/benzene",
+    "save_path": "/home/jc6224/hf_cpp/vis_data",
+    "basis_path": "/home/jc6224/hf_cpp/basis",
+    "folder_name": "benzene_3D(1)",
+
+    "render_density": false,
+    "render_homo": false,
+    "render_lumo": false,
+
+    "render_homo_alpha": false,
+    "render_lumo_alpha": false,
+    "render_homo_beta": false,
+    "render_lumo_beta": false,
+
+    "render_homo-1": true,
+    "render_lumo+1": true,
+    "render_homo-1_alpha": false,
+    "render_lumo+1_alpha": false,
+    "render_homo-1_beta": false,
+    "render_lumo+1_beta": false
+}

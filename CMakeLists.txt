@@ -37,19 +37,20 @@ target_link_libraries(hf_core INTERFACE
     CUDA::cudart
 )
 
-#---------------------------------
+#-------------------------------------------
 
 add_library(vis INTERFACE)
 
 target_include_directories(vis INTERFACE
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/external/rapidcsv
+    ${CMAKE_SOURCE_DIR}/cuda/include
 )
 
 target_link_libraries(vis INTERFACE
     nlohmann_json::nlohmann_json
+    CUDA::cudart
 )
-
 #----------------------------------------------
 
 add_executable(single_run apps/single_run.cpp cuda/src/eri.cu)
@@ -60,6 +61,9 @@ target_link_libraries(bl_scan hf_core)
 
 add_executable(dissociation apps/dissociation.cpp cuda/src/eri.cu)
 target_link_libraries(dissociation hf_core)
+
+add_executable(visual apps/visualization.cpp cuda/src/visual.cu)
+target_link_libraries(visual vis)
 
 #----------------------------------------------
 

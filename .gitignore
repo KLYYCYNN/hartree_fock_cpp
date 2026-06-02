@@ -6,3 +6,4 @@ build/
 .vscode/
 tests/
 scripts/python/
+vis_data/

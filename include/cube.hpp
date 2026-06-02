@@ -2,9 +2,9 @@
 #include <iomanip>
 #include <stdexcept>
 #include <functional>
-#include "integrals.hpp"
 #include "visual.hpp"
 #include "save.hpp"
+#include "indexing.hpp"
 
 double function_eval(const basis_function& function,
                      const vector3& position)
@@ -135,9 +135,9 @@ orbital_wf(const std::vector<basis_function>& basis,
 }
 
 
-std::vector<vector3> box_points(const vector3& center,
-                               const double& L,
-                               const int res)
+std::vector<vector3> box_points(const vector3 center,
+                                const double L,
+                                const int res)
 {
 
     if (res < 2){
@@ -171,9 +171,69 @@ std::vector<vector3> box_points(const vector3& center,
 }
 
 
+std::vector<vector3> square_points(const vector3 center,
+                                   const double L,
+                                   const int res,
+                                   std::string dir){
+
+    std::vector<std::string> direcs = {"xy", "yz", "xz"};
+    std::vector<std::pair<int, int>> axis = {{0, 1}, {1, 2}, {0, 2}};
+    std::vector<double> pos = {center.x, center.y, center.z};
+
+    if (dir != direcs[0] && dir != direcs[1] && dir != direcs[2]){
+        throw std::runtime_error(R"(valid inputs are xy, yz, and xz)");
+    }
+
+    int direc_idx = getIndex(direcs, dir);
+    std::pair<int, int> axes = axis[direc_idx];
+    int p_axis = 3 - axes.first - axes.second;
+
+    double inc = L / (res - 1.0);
+
+    std::vector<double> corner(3);
+    corner[axes.first] = pos[axes.first] - L / 2.0;
+    corner[axes.second] = pos[axes.second] - L / 2.0;
+    corner[p_axis] = pos[p_axis];
+
+    std::vector<vector3> points;
+
+    for (int i = 0; i < res; ++i){
+        for (int j = 0; j < res; ++j){
+
+            vector3 point_vec;
+            std::vector<double> point(3);
+
+            point[axes.first] = corner[axes.first] +
+                                inc * static_cast<double>(i);
+
+            point[axes.second] = corner[axes.second] +
+                                 inc * static_cast<double>(j);
+
+            point[p_axis] = pos[p_axis];
+
+            point_vec = position_vector(point[0], point[1], point[2]);
+            points.emplace_back(point_vec);
+        }
+    }
+
+    return points;
+}
+
+
+std::vector<double> density_gpu(const std::vector<basis_function>& basis,
+                                const std::vector<double>& density_matrix,
+                                const std::vector<vector3>& r);
+
+std::vector<double> orbital_gpu(const std::vector<basis_function>& basis,
+                                const std::vector<double>& coeff_mat,
+                                const int index,
+                                const std::vector<vector3>& r);
+
+
+
 cube_data density3d(const std::vector<basis_function>& basis,
                     const std::vector<double>& density_matrix,
-                    const vector3& center,
+                    const vector3 center,
                     const double L,
                     const int resolution,
                     std::string renderer = "CPU")
@@ -213,7 +273,7 @@ cube_data density3d(const std::vector<basis_function>& basis,
 
 void check_index(int idx, int K){
 
-    if (idx < 0 || idx > K){
+    if (idx < 0 || idx >= K){
         throw std::runtime_error("orbital index out of range");
     }
 
@@ -432,247 +492,251 @@ void save_matrix_csv(const std::string& file_name,
 }
 
 
-
-void density2d(const std::string& path,
-               const std::string& folder_name,
-               const std::vector<basis_function>& basis, 
-               const std::vector<double>& density_matrix,
-               square plane, int res)
+std::vector<double> density2d(const std::vector<basis_function>& basis,
+                              const std::vector<double>& density_matrix,
+                              const vector3& center,
+                              const double L,
+                              const std::string direc,
+                              const int resolution,
+                              std::string renderer = "CPU")
 {
 
-    vector3 C = plane.center;
-    double L = plane.L;
-    //obtain two orthogonal unit vectors
-    vector3 e1 = v3normalize(v3sub(plane.A, C));
-
-    vector3 e2n = v3sub(plane.B, C);
-    vector3 proj21 = v3scale(e1, v3dot(e2n, e1));
-    vector3 e2 = v3normalize(v3sub(e2n, proj21));
-    //starting point
-    vector3 corner = v3sub(C, v3add(v3scale(e1, L / 2.0), 
-                                    v3scale(e2, L / 2.0)));
-
-    std::vector<vector3> positions(res * res);
-
-    for (int i = 0; i < res; ++ i){
-        for (int j = 0; j < res; ++ j){
-
-            double step_i = i * L / (res - 1);
-            double step_j = j * L / (res - 1);
-
-            positions[index2d(i, j, res)] =  
-            v3add(corner, v3add(v3scale(e2, step_i), 
-                          v3scale(e1, step_j)));
-
-            }
-        }
-    
-    std::vector<double> rho_r = electron_density(basis, 
-                                                 density_matrix, 
-                                                 positions);
-
-    std::string folder = path + "/" + folder_name;
-    create_folder(folder);
-    
-    std::string csv_name = folder + "/density2d.csv";
-    save_matrix_csv(csv_name, rho_r, res, res);
-
-    std::string fileName = folder + "/square.json";
-
-    nlohmann::ordered_json data;
-    data["side_length"] = L;
-    data["resolution"] = std::to_string(res) + " X " +
-                         std::to_string(res);
-
-    std::ofstream file(fileName);
-    if (file.is_open()){
-        file << data.dump(4);
-        file.close();
-    } else{
-        std::cout << "metadata writing failed." << std::endl;
+    size_t K = basis.size();
+    if (K * K != density_matrix.size()){
+        throw std::runtime_error(R"(Mismatch between density matrix and
+                                    basis sizes)");
     }
 
-    std::vector<double> hside = {e2.x, e2.y, e2.z};
-    std::vector<double> vside = {e1.x, e1.y, e1.z};
-    std::vector<double> centre = {C.x, C.y, C.z};
+    if (renderer != "CPU" && renderer != "GPU"){
+        throw std::runtime_error("Unsupported rendering hardware");
+    }
 
-    std::vector<std::string> 
-    headers = {"hside_direc", "vside_direc", "center"};
+    std::vector<vector3> positions = 
+                         square_points(center, L, resolution, direc);
 
-    save_csv({hside, vside, centre}, headers, folder + "/square.csv");
+    std::vector<double> Psi2;
+
+    if (renderer == "CPU"){
+        Psi2 = electron_density(basis, density_matrix, positions);
+    } else{
+        Psi2 = density_gpu(basis, density_matrix, positions);
+    }
+
+    return Psi2;
 }
 
 
-
-
-void rhf_2d_homo_lumo(const std::string& path,
-                      const std::string& folder_name,
-                      const std::vector<basis_function>& basis, 
-                      const std::vector<double>& coeff_mat,
-                      int n_electrons, square plane, int res)
+std::vector<double>
+homo_lumo_2d(const std::vector<basis_function>& basis,
+             const std::pair
+             <std::vector<double>, std::vector<double>>& coeff_mats,
+             const std::pair<int, int> occupation,
+             const vector3 center,
+             const double L,
+             const std::string direc,
+             const int res,
+             const bool homo_or_lumo = true,
+             const bool alpha_or_beta = true,
+             const std::string renderer = "CPU")
 {
-    if (n_electrons % 2 != 0){
+
+    int K = basis.size();
+
+    std::vector<double> coeff_alpha = coeff_mats.first;
+    std::vector<double> coeff_beta = coeff_mats.second;
+
+    if (coeff_alpha.size() != coeff_beta.size()){
         throw std::runtime_error
-        ("Odd number of electrons in RHF");
+        ("Coefficient matrices dimension mismatch");
     }
 
-    vector3 C = plane.center;
-    double L = plane.L;
-    //obtain two orthogonal unit vectors
-    vector3 e1 = v3normalize(v3sub(plane.A, C));
+    if (coeff_alpha.size() != K * K){
+        throw std::runtime_error
+        ("Coefficient matrix dimension doesn't match basis size.");
+    }
 
-    vector3 e2n = v3sub(plane.B, C);
-    vector3 proj21 = v3scale(e1, v3dot(e2n, e1));
-    vector3 e2 = v3normalize(v3sub(e2n, proj21));
-    //starting point
-    vector3 corner = v3sub(C, v3add(v3scale(e1, L / 2.0), 
-                                    v3scale(e2, L / 2.0)));
+    if (res < 2){
+        throw std::runtime_error("resolution must be at least 2");
+    }
 
-    std::vector<vector3> positions(res * res);
+    if (renderer != "CPU" && renderer != "GPU"){
+        throw std::runtime_error("unsupported rendering hardware");
+    }
 
-    for (int i = 0; i < res; ++ i){
-        for (int j = 0; j < res; ++ j){
+    std::function<std::vector<double>(
+    const std::vector<basis_function>&,
+    const std::vector<double>&,
+    int,
+    const std::vector<vector3>&)> orbital_eval;
 
-            double step_i = i * L / (res - 1);
-            double step_j = j * L / (res - 1);
-
-            positions[index2d(i, j, res)] =  
-            v3add(corner, v3add(v3scale(e2, step_i), 
-                          v3scale(e1, step_j)));
-
-            }
-        }
-    
-    std::pair<int, int> indices = {n_electrons / 2 - 1,
-                                   n_electrons / 2};
-
-    std::pair<std::vector<double>, std::vector<double>>
-    homo_lumo = homo_lumo_wf(basis, coeff_mat, indices, positions);
-
-    std::string folder = path + "/" + folder_name;
-    create_folder(folder);
-    
-    save_matrix_csv(folder + "/homo2d.csv", homo_lumo.first, res, res);
-    save_matrix_csv(folder + "/lumo2d.csv", homo_lumo.second, res, res);
-
-    std::string fileName = folder + "/square.json";
-
-    nlohmann::ordered_json data;
-    data["side_length"] = L;
-    data["resolution"] = std::to_string(res) + " X " +
-                         std::to_string(res);
-
-    std::ofstream file(fileName);
-    if (file.is_open()){
-        file << data.dump(4);
-        file.close();
+    if (renderer == "CPU"){
+        orbital_eval = orbital_wf;
     } else{
-        std::cout << "metadata writing failed." << std::endl;
+        orbital_eval = orbital_gpu;
     }
 
-    std::vector<double> hside = {e2.x, e2.y, e2.z};
-    std::vector<double> vside = {e1.x, e1.y, e1.z};
-    std::vector<double> centre = {C.x, C.y, C.z};
+    std::vector<vector3> positions = square_points(center, L, res, direc);
 
-    std::vector<std::string> 
-    headers = {"hside_direc", "vside_direc", "center"};
+    std::vector<double> psi;
+    int orbital_index;
+    
+    if (homo_or_lumo){
+        if (alpha_or_beta){
 
-    save_csv({hside, vside, centre}, headers, folder + "/square.csv");
+            orbital_index = occupation.first - 1;
+            check_index(orbital_index, K);
+            psi = orbital_eval(basis, coeff_alpha, 
+                               orbital_index, positions);
 
+        } else{
+
+            orbital_index = occupation.second - 1;
+            check_index(orbital_index, K);
+            psi = orbital_eval(basis, coeff_beta, 
+                               orbital_index, positions);
+        }
+    } else{
+        if (alpha_or_beta){
+
+            orbital_index = occupation.first;
+            check_index(orbital_index, K);
+            psi = orbital_eval(basis, coeff_alpha, 
+                               orbital_index , positions);
+
+        } else{
+
+            orbital_index = occupation.second;
+            check_index(orbital_index, K);
+            psi = orbital_eval(basis, coeff_beta, 
+                               orbital_index , positions);
+
+        }
+    }
+
+    return psi;
 }
 
 
-void uhf_2d_homo_lumo(const std::string& path,
-                      const std::string& folder_name,
-                      const std::vector<basis_function>& basis, 
-                      const std::vector<double>& coeff_mat,
-                      const std::vector<double>& mo_energies,
-                      const std::vector<double>& occupations,
-                      square plane, int res)
+inline
+void check_orbital_index(const int idx, const int K)
 {
-
-
-    vector3 C = plane.center;
-    double L = plane.L;
-    //obtain two orthogonal unit vectors
-    vector3 e1 = v3normalize(v3sub(plane.A, C));
-
-    vector3 e2n = v3sub(plane.B, C);
-    vector3 proj21 = v3scale(e1, v3dot(e2n, e1));
-    vector3 e2 = v3normalize(v3sub(e2n, proj21));
-    //starting point
-    vector3 corner = v3sub(C, v3add(v3scale(e1, L / 2.0), 
-                                    v3scale(e2, L / 2.0)));
-
-    std::vector<vector3> positions(res * res);
-
-    for (int i = 0; i < res; ++ i){
-        for (int j = 0; j < res; ++ j){
-
-            double step_i = i * L / (res - 1);
-            double step_j = j * L / (res - 1);
-
-            positions[index2d(i, j, res)] =  
-            v3add(corner, v3add(v3scale(e2, step_i), 
-                          v3scale(e1, step_j)));
-
-            }
-        }
-    
-    std::pair<int, int> indices = homo_lumo_indices(mo_energies, occupations);
-
-    std::pair<std::vector<double>, std::vector<double>>
-    homo_lumo = homo_lumo_wf(basis, coeff_mat, indices, positions);
-
-    std::string folder = path + "/" + folder_name;
-    create_folder(folder);
-    
-    save_matrix_csv(folder + "/homo2d.csv", homo_lumo.first, res, res);
-    save_matrix_csv(folder + "/lumo2d.csv", homo_lumo.second, res, res);
-
-    nlohmann::ordered_json data;
-    data["side_length"] = L;
-    data["resolution"] = std::to_string(res) + " X " +
-                         std::to_string(res);
-
-    std::string fileName = folder + "/square/json";
-
-    std::ofstream file(fileName);
-    if (file.is_open()){
-        file << data.dump(4);
-        file.close();
-    } else{
-        std::cout << "metadata writing failed." << std::endl;
+    if (idx < 0 || idx >= K) {
+        throw std::runtime_error("orbital index out of range");
     }
-
-    std::vector<double> hside = {e2.x, e2.y, e2.z};
-    std::vector<double> vside = {e1.x, e1.y, e1.z};
-    std::vector<double> centre = {C.x, C.y, C.z};
-
-    std::vector<std::string> 
-    headers = {"hside_direc", "vside_direc", "center"};
-
-    save_csv({hside, vside, centre}, headers, folder + "/square.csv");
-
 }
 
 
-cube_data density3d_gpu(const std::vector<basis_function>& basis,
-                        const std::vector<double>& density_matrix,
-                        const vector3& center,
-                        const double L,
-                        const int resolution)
+inline
+std::vector<double>
+orbital_2d(const std::vector<basis_function>& basis,
+           const std::vector<double>& coeff_mat,
+           const int orbital_index,
+           const vector3 center,
+           const double L,
+           const std::string direc,
+           const int res,
+           const std::string renderer = "CPU")
 {
+    int K = static_cast<int>(basis.size());
 
-    std::vector<vector3> positions = box_points(center, L, resolution);
-    
+    if (coeff_mat.size() != static_cast<size_t>(K) * K) {
+        throw std::runtime_error(
+            "Coefficient matrix dimension doesn't match basis size."
+        );
+    }
+
+    if (res < 2) {
+        throw std::runtime_error("resolution must be at least 2");
+    }
+
+    if (renderer != "CPU" && renderer != "GPU") {
+        throw std::runtime_error("unsupported rendering hardware");
+    }
+
+    check_orbital_index(orbital_index, K);
+
+    std::function<std::vector<double>(
+        const std::vector<basis_function>&,
+        const std::vector<double>&,
+        int,
+        const std::vector<vector3>&
+    )> orbital_eval;
+
+    if (renderer == "CPU") {
+        orbital_eval = orbital_wf;
+    } else {
+        orbital_eval = orbital_gpu;
+    }
+
+    std::vector<vector3> positions =
+        square_points(center, L, res, direc);
+
+    std::vector<double> psi =
+        orbital_eval(basis, coeff_mat, orbital_index, positions);
+
+    return psi;
+}
+
+
+inline
+cube_data
+orbital_3d(const std::vector<basis_function>& basis,
+           const std::vector<double>& coeff_mat,
+           const int orbital_index,
+           const vector3 center,
+           const double L,
+           const int res,
+           const std::string renderer = "CPU")
+{
+    int K = static_cast<int>(basis.size());
+
+    if (coeff_mat.size() != static_cast<size_t>(K) * K) {
+        throw std::runtime_error(
+            "Coefficient matrix dimension doesn't match basis size."
+        );
+    }
+
+    if (res < 2) {
+        throw std::runtime_error("resolution must be at least 2");
+    }
+
+    if (renderer != "CPU" && renderer != "GPU") {
+        throw std::runtime_error("unsupported rendering hardware");
+    }
+
+    check_orbital_index(orbital_index, K);
+
+    std::function<std::vector<double>(
+        const std::vector<basis_function>&,
+        const std::vector<double>&,
+        int,
+        const std::vector<vector3>&
+    )> orbital_eval;
+
+    if (renderer == "CPU") {
+        orbital_eval = orbital_wf;
+    } else {
+        orbital_eval = orbital_gpu;
+    }
+
+    std::vector<vector3> positions =
+        box_points(center, L, res);
+
+    std::vector<double> psi =
+        orbital_eval(basis, coeff_mat, orbital_index, positions);
+
     cube_data output;
-    output.field = density_gpu(basis, density_matrix, positions);
 
-    output.origin = position_vector(center.x - L / 2,
-                    center.y - L / 2, center.z - L / 2);
-    output.dx = L / (resolution - 1);
-    output.res = resolution;
+    output.field = psi;
+
+    output.origin = position_vector(
+        center.x - L / 2.0,
+        center.y - L / 2.0,
+        center.z - L / 2.0
+    );
+
+    output.dx = L / static_cast<double>(res - 1);
+    output.res = res;
 
     return output;
 }

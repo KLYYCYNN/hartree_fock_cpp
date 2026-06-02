@@ -75,3 +75,12 @@ std::pair<int, int> quartet_to_pairs(size_t qid)
 
     return {pid1, pid2};
 }
+
+
+inline
+std::pair<int, int> pair_to_indices(int pid) {
+
+    int a = int((sqrt(8.0 * pid + 1.0) - 1.0) / 2.0);
+    int b = pid - a * (a + 1) / 2;
+    return {a, b};
+}

@@ -7,7 +7,7 @@
 #include "rapidcsv.h"
 #include "types.hpp"
 
-
+inline
 void printMatrix(const std::vector<std::vector<double>>& mat) {
     for (const auto& row : mat) {
         for (const auto& val : row)
@@ -16,7 +16,7 @@ void printMatrix(const std::vector<std::vector<double>>& mat) {
     }
 }
 
-
+inline
 void printVector(const std::vector<double>& v) {
     for (const auto& i : v) {
         std::cout << i << " ";
@@ -24,7 +24,7 @@ void printVector(const std::vector<double>& v) {
     std::cout << std::endl; // New line after the loop
 }
 
-
+inline
 void saveVector(const std::string& filename, const std::vector<double>& vec) {
     std::ofstream outFile(filename);
 
@@ -38,7 +38,7 @@ void saveVector(const std::string& filename, const std::vector<double>& vec) {
     }
 }
 
-
+inline
 std::vector<double> linspace(double start, double stop, int npoints){
     double step = (stop - start) / (npoints - 1);
     std::vector<double> arrray;
@@ -68,17 +68,7 @@ void printVector(const std::vector<T>& vec, const std::string& sep = " ") {
 }
 
 
-std::vector<double> density_gpu(const std::vector<basis_function>& basis,
-                                const std::vector<double>& density_matrix,
-                                const std::vector<vector3>& r);
-
-
-std::vector<double> orbital_gpu(const std::vector<basis_function>& basis,
-                                const std::vector<double>& coeff_mat,
-                                const int index,
-                                const std::vector<vector3>& r);
-
-
+inline
 std::vector<double> slice_vector(const std::vector<double>& vec, int start, int end) {
     // Safety check: ensure indices are valid and in order
     if (start < 0 || end > vec.size() || start > end) {

@@ -4,6 +4,7 @@
 #include <nlohmann/json.hpp>
 #include "scf.hpp"
 #include "save.hpp"
+#include "visual.hpp"
 
 using json = nlohmann::json;
 
@@ -17,16 +18,6 @@ void require_key(const json& input, const std::string& key)
 }
 
 
-std::vector<double> linspace(double start, double stop, int npoints){
-    double step = (stop - start) / (npoints - 1);
-    std::vector<double> arrray;
-    for (int i = 0; i < npoints; ++i)
-    {
-        arrray.emplace_back(start + i*step);
-    }
-
-    return arrray;
-}
 
 //------------------------------single_run-----------------------------------
 //oooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooo
@@ -586,27 +577,8 @@ void run_dissociation(const scf_options& opt){
 }
 
 
-//------------------------------2D visualization-----------------------------
-//oooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooo
-//oooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooo
-//oooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooooooooOOOOO00000OOOOOooooo
-//----------------------visualization options struct-------------------------
 
-struct visual_options{
 
-    int resolution = 512;
-    vector3 center;
-    double side_length;
-    std::string plane = "none";
-
-    std::string dimension = "2D";
-    std::string render_hardware = "CPU";
-    std::string data_path;
-    std::string save_path;
-    bool render_density, render_orbitals;
-
-    
-};
 
 
 
