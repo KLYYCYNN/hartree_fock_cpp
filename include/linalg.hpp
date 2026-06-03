@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include <stdexcept>
 #include <cmath>
+#include <deque>
 #include "indexing.hpp"
 
 
@@ -36,6 +37,24 @@ std::vector<double> mat2vec(const Eigen::MatrixXd& mat) {
 std::vector<double> vec2vec(const Eigen::VectorXd& ev) {
     // Construct std::vector using the pointer to the start and end of Eigen data
     return std::vector<double>(ev.data(), ev.data() + ev.size());
+}
+
+double vector_dot(const std::vector<double>& r1,
+                  const std::vector<double>& r2)
+{
+
+    if (r1.size() != r2.size()){
+        throw std::runtime_error(R"(cannot take scalar product between
+                                    two vectors of different sizes)");
+    }
+
+    double prod = 0.0;
+
+    for (int i = 0; i < static_cast<int>(r1.size()); ++i){
+        prod += r1[i] * r2[i];
+    }
+
+    return prod;
 }
 
 
@@ -297,6 +316,17 @@ double RMSD(const std::vector<double>& A,
     return std::sqrt(tot_diff2 / n1);
 }
 
+double vector_norm(const std::vector<double>& vec){
+
+    double norm = 0.0;
+
+    for (double xi : vec){
+        norm += xi * xi;
+    }
+
+    return std::sqrt(norm);
+}
+
 
 std::vector<double> fock_matrix_uhf(const std::vector<double>& core_ham,
                                     const std::vector<double>& coulomb,
@@ -319,4 +349,163 @@ std::vector<double> fock_matrix_uhf(const std::vector<double>& core_ham,
     }
 
     return fock;
+}
+
+
+std::vector<double> error_matrix(const std::vector<double>& density,
+                                 const std::vector<double>& fock,
+                                 const std::vector<double>& overlap)
+{
+    size_t K = static_cast<size_t>(std::sqrt(density.size()));
+    int int_K = static_cast<int>(K);
+
+    if (fock.size() != K * K || overlap.size() != K * K){
+        throw std::runtime_error(R"(mismatch between matrix sizes)");
+    }
+
+    if (density.size() != K * K){
+        throw std::runtime_error(R"(density matrix is not a square matrix)");
+    }
+
+
+    Eigen::MatrixXd S = vec2mat(overlap, int_K , int_K);
+    Eigen::MatrixXd P = vec2mat(density, int_K , int_K);
+    Eigen::MatrixXd F = vec2mat(fock, int_K , int_K);
+
+    Eigen::MatrixXd R = F * P * S - S * P * F;
+
+    return mat2vec(R);
+
+}
+
+
+void
+update_matrix_history(const std::vector<double>& matrix,
+                      std::deque<std::vector<double>>& history,
+                      int max_history)
+{
+    int hist_size = static_cast<int>(history.size());
+
+    if (hist_size > max_history){
+        throw std::runtime_error("Stored too many matrices");
+    }
+
+    if (hist_size == max_history){
+
+        history.pop_front();
+        history.push_back(matrix);
+
+    } else{
+        history.push_back(matrix);
+    }
+
+}
+
+
+std::vector<double>
+aug_pulay_matrix(const std::deque<std::vector<double>>& error_vectors)
+{
+    int n = static_cast<int>(error_vectors.size());
+
+    std::vector<double> aug_B((n + 1) * (n + 1), 0.0);
+
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            aug_B[index2d(i, j, n + 1)] =
+                vector_dot(error_vectors[i], error_vectors[j]);
+        }
+    }
+
+    for (int i = 0; i < n; ++i) {
+        aug_B[index2d(i, n, n + 1)] = -1.0;
+        aug_B[index2d(n, i, n + 1)] =  1.0;
+    }
+
+    aug_B[index2d(n, n, n + 1)] = 0.0;
+
+    return aug_B;
+}
+
+
+std::vector<double>
+diis_coefficients(const std::vector<double>& aug_B, int n)
+{
+    // aug_B has size (n+1)*(n+1), row-major
+    Eigen::MatrixXd A = vec2mat(aug_B, n + 1, n + 1);
+
+    Eigen::VectorXd rhs = Eigen::VectorXd::Zero(n + 1);
+    rhs(n) = 1.0;   // because your last row is +1 +1 +1 ...
+
+    Eigen::VectorXd x = A.fullPivLu().solve(rhs);
+
+    std::vector<double> coeffs(n);
+    for (int i = 0; i < n; ++i) {
+        coeffs[i] = x(i);
+    }
+
+    return coeffs;
+}
+
+
+std::vector<double> 
+vector_lin_comb(const std::deque<std::vector<double>>& vectors,
+                const std::vector<double>& coeffs)
+{
+    if (vectors.empty()) {
+        throw std::runtime_error("Cannot combine empty vector history.");
+    }
+
+    size_t n1 = vectors.size();
+    size_t n2 = coeffs.size();
+
+    if (n1 != n2){
+        throw std::runtime_error
+              (R"(Different number of vectors and coefficients)");
+    }
+
+    int n = static_cast<int>(n1);
+    int vec_dim = static_cast<int>(vectors[0].size());
+    size_t vec_size = vectors[0].size();
+    std::vector<double> combo(vec_dim, 0.0);
+
+    for (int i = 0; i < n; ++i){
+
+        const std::vector<double>& vec_i = vectors[i];
+
+        if (vec_i.size() != vec_size){
+            throw std::runtime_error(R"(cannot combine vectors with 
+                                     different sizes)");
+            }
+
+        for (int j = 0; j < vec_dim; ++j){
+            combo[j] += coeffs[i] * vec_i[j];
+        }
+
+    }
+
+    return combo;
+}
+
+std::vector<double> 
+fock_diis(const std::deque<std::vector<double>>& fock_history,
+          const std::deque<std::vector<double>>& error_vectors)
+{
+
+    size_t hist_size = fock_history.size();
+
+    if (hist_size == 0) {
+        throw std::runtime_error("Empty DIIS history.");
+    }
+
+    if (error_vectors.size() != hist_size){
+        throw std::runtime_error(R"(Stored different numbers of
+                                 Fock matrices and error vectors)");
+    }
+
+
+    std::vector<double> aug_B = aug_pulay_matrix(error_vectors);
+    std::vector<double> coeffs = 
+                diis_coefficients(aug_B, static_cast<int>(hist_size));
+
+    return vector_lin_comb(fock_history, coeffs);
 }

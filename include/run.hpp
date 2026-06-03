@@ -130,7 +130,7 @@ void run_scf_from_options(const scf_options& opt)
 {
     if (opt.method == "RHF") {
 
-        rhf_data result = rhf_solver(
+        rhf_data result = rhf_diis(
             opt.config,
             opt.basis,
             opt.basis_path,
@@ -148,7 +148,7 @@ void run_scf_from_options(const scf_options& opt)
     }
     else if (opt.method == "UHF") {
 
-        uhf_data result = uhf_solver(
+        uhf_data result = uhf_diis(
             opt.config,
             opt.basis,
             opt.basis_path,
@@ -350,7 +350,7 @@ void run_bl_scan(const bl_scan_options& opt)
 
 
 
-        rhf_data result = rhf_solver(
+        rhf_data result = rhf_diis(
             config_i,
             opt.basis,
             opt.basis_path,
@@ -504,7 +504,7 @@ void run_dissociation(const scf_options& opt){
                                  RHF molecules)");
     }
 
-    rhf_data molecule_result = rhf_solver(
+    rhf_data molecule_result = rhf_diis(
         opt.config,
         opt.basis,
         opt.basis_path,
@@ -549,7 +549,7 @@ void run_dissociation(const scf_options& opt){
                         position_vector(0.0, 0.0, 0.0)}};
 
         uhf_data atom_result
-        = uhf_solver(single_atom, opt.basis, opt.basis_path, 
+        = uhf_diis(single_atom, opt.basis, opt.basis_path, 
                      atom_spin_occupancy(atoms_info.first[i]),
                      0, opt.eri_device, false, {}, {},
                      opt.max_it, opt.epsilon, opt.damping,

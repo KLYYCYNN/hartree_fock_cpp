@@ -1,0 +1,82 @@
+{
+    "method": "RHF",
+    "basis": "cc-pVTZ",
+    "basis_path": "/home/jc6224/hf_cpp/basis",
+    "save_path": "/home/jc6224/hf_cpp/data/organic",
+    "folder_name": "phenol",
+    "charge": 0,
+    "eri_hardware": "GPU",
+
+    "max_iterations": 500,
+    "epsilon": 1e-6,
+    "damping": 0.3,
+    "screening_threshold": 1e-8,
+
+    "atoms": [
+        {
+            "symbol": "O",
+            "coordinate_type": "cartesian",
+            "position": [-4.4641, 0.0002, -0.0008]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [-1.8918, 0.0000, 0.0006]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [-0.5739, 2.2830, 0.0004]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [-0.5741, -2.2828, 0.0002]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [2.0624, 2.2830, -0.0002]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [2.0622, -2.2830, 0.0000]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [3.3803, 0.0000, -0.0004]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [-1.5781, 4.0744, 0.0004]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [-1.5902, -4.0672, 0.0000]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [3.0882, 4.0602, -0.0006]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [3.0874, -4.0606, -0.0004]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [5.4327, -0.0002, -0.0008]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [-5.0594, 1.7391, -0.0009]
+        }
+    ]
+}

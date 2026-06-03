@@ -618,15 +618,6 @@ homo_lumo_2d(const std::vector<basis_function>& basis,
 
 
 inline
-void check_orbital_index(const int idx, const int K)
-{
-    if (idx < 0 || idx >= K) {
-        throw std::runtime_error("orbital index out of range");
-    }
-}
-
-
-inline
 std::vector<double>
 orbital_2d(const std::vector<basis_function>& basis,
            const std::vector<double>& coeff_mat,
@@ -653,7 +644,7 @@ orbital_2d(const std::vector<basis_function>& basis,
         throw std::runtime_error("unsupported rendering hardware");
     }
 
-    check_orbital_index(orbital_index, K);
+    check_index(orbital_index, K);
 
     std::function<std::vector<double>(
         const std::vector<basis_function>&,
@@ -704,7 +695,7 @@ orbital_3d(const std::vector<basis_function>& basis,
         throw std::runtime_error("unsupported rendering hardware");
     }
 
-    check_orbital_index(orbital_index, K);
+    check_index(orbital_index, K);
 
     std::function<std::vector<double>(
         const std::vector<basis_function>&,

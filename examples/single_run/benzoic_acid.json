@@ -1,0 +1,150 @@
+{
+    "method": "RHF",
+    "basis": "cc-pVTZ",
+    "basis_path": "/home/jc6224/hf_cpp/basis",
+    "save_path": "/home/jc6224/hf_cpp/data/organic",
+    "folder_name": "benzoic_acid",
+    "charge": 0,
+    "eri_hardware": "GPU",
+    "max_iterations": 500,
+    "epsilon": 1e-06,
+    "damping": 0.3,
+    "screening_threshold": 1e-08,
+    "atoms": [
+        {
+            "symbol": "O",
+            "coordinate_type": "cartesian",
+            "position": [
+                4.359031,
+                -2.238003,
+                0.001512
+            ]
+        },
+        {
+            "symbol": "O",
+            "coordinate_type": "cartesian",
+            "position": [
+                4.643246,
+                2.047896,
+                -0.000945
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                0.580524,
+                0.064062,
+                0.0
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                -0.782725,
+                2.320206,
+                0.000567
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                -0.692018,
+                -2.244617,
+                -0.000567
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                -3.418137,
+                2.268238,
+                0.000567
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                -3.327619,
+                -2.296584,
+                -0.000567
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                -4.6903,
+                -0.040251,
+                0.0
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                3.327997,
+                0.118864,
+                -0.000567
+            ]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [
+                0.172721,
+                4.1385,
+                0.000756
+            ]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [
+                0.293852,
+                -4.045337,
+                -0.001134
+            ]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [
+                -4.479785,
+                4.024739,
+                0.000945
+            ]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [
+                -4.319725,
+                -4.093336,
+                -0.000945
+            ]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [
+                -6.742354,
+                -0.08088,
+                0.0
+            ]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [
+                6.212097,
+                -2.179988,
+                0.002079
+            ]
+        }
+    ]
+}

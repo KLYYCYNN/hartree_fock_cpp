@@ -3,30 +3,31 @@
     "basis": "cc-pVTZ",
     "basis_path": "/home/jc6224/hf_cpp/basis",
     "save_path": "/home/jc6224/hf_cpp/data/common_molecules",
-    "folder_name": "G_T_N2(3)",
+    "folder_name": "G_T_CO2(3)",
 
     "charge": 0,
-    "spin_occupancy": {
-        "alpha": 7,
-        "beta": 7
-    },
-
     "eri_hardware": "GPU",
-    "max_iterations": 10000,
+
+    "max_iterations": 500,
     "epsilon": 1e-6,
     "damping": 0.3,
     "screening_threshold": 1e-8,
 
     "atoms": [
         {
-            "symbol": "N",
+            "symbol": "C",
             "coordinate_type": "cartesian",
-            "position": [0.0, 1.034, 0.0]
+            "position": [0.0, 0.0, 0.0]
         },
         {
-            "symbol": "N",
+            "symbol": "O",
             "coordinate_type": "cartesian",
-            "position": [0.0, -1.034, 0.0]
+            "position": [0.0, 0.0, 2.192]
+        },
+        {
+            "symbol": "O",
+            "coordinate_type": "cartesian",
+            "position": [0.0, 0.0, -2.192]
         }
     ]
 }

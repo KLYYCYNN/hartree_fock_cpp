@@ -1,0 +1,141 @@
+{
+    "method": "RHF",
+    "basis": "cc-pVTZ",
+    "basis_path": "/home/jc6224/hf_cpp/basis",
+    "save_path": "/home/jc6224/hf_cpp/data/organic",
+    "folder_name": "catechol",
+    "charge": 0,
+    "eri_hardware": "GPU",
+    "max_iterations": 500,
+    "epsilon": 1e-06,
+    "damping": 0.3,
+    "screening_threshold": 1e-08,
+    "atoms": [
+        {
+            "symbol": "O",
+            "coordinate_type": "cartesian",
+            "position": [
+                3.374673,
+                2.626719,
+                0.000756
+            ]
+        },
+        {
+            "symbol": "O",
+            "coordinate_type": "cartesian",
+            "position": [
+                3.374673,
+                -2.626719,
+                -0.000189
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                1.158024,
+                1.317706,
+                -0.000567
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                1.157835,
+                -1.317895,
+                -0.000189
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                -1.124765,
+                2.635979,
+                -0.000378
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                -1.124954,
+                -2.63579,
+                0.000189
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                -3.407554,
+                1.317895,
+                0.000189
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                -3.407743,
+                -1.317895,
+                0.000189
+            ]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [
+                -1.137993,
+                4.689355,
+                0.0
+            ]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [
+                -1.152733,
+                -4.689166,
+                0.000567
+            ]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [
+                -5.185031,
+                2.344016,
+                0.000378
+            ]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [
+                -5.185408,
+                -2.343827,
+                0.000567
+            ]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [
+                4.759653,
+                1.417295,
+                0.001134
+            ]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [
+                3.006554,
+                -4.427439,
+                0.0
+            ]
+        }
+    ]
+}

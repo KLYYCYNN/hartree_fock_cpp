@@ -1,0 +1,123 @@
+{
+    "method": "RHF",
+    "basis": "cc-pVTZ",
+    "basis_path": "/home/jc6224/hf_cpp/basis",
+    "save_path": "/home/jc6224/hf_cpp/data/organic",
+    "folder_name": "1_4_benzoquinone",
+    "charge": 0,
+    "eri_hardware": "GPU",
+    "max_iterations": 500,
+    "epsilon": 1e-06,
+    "damping": 0.3,
+    "screening_threshold": 1e-08,
+    "atoms": [
+        {
+            "symbol": "O",
+            "coordinate_type": "cartesian",
+            "position": [
+                5.027805,
+                0.000189,
+                0.00189
+            ]
+        },
+        {
+            "symbol": "O",
+            "coordinate_type": "cartesian",
+            "position": [
+                -5.027805,
+                0.000189,
+                0.001512
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                2.711001,
+                -0.000189,
+                -0.000378
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                -2.711001,
+                0.000189,
+                0.0
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                -1.261014,
+                2.386346,
+                -0.000756
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                1.261014,
+                2.386157,
+                -0.000945
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                -1.261203,
+                -2.386346,
+                -0.000567
+            ]
+        },
+        {
+            "symbol": "C",
+            "coordinate_type": "cartesian",
+            "position": [
+                1.261014,
+                -2.386346,
+                -0.000945
+            ]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [
+                -2.316048,
+                4.142658,
+                -0.000756
+            ]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [
+                -2.316426,
+                -4.142658,
+                -0.000756
+            ]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [
+                2.316048,
+                4.142469,
+                -0.000945
+            ]
+        },
+        {
+            "symbol": "H",
+            "coordinate_type": "cartesian",
+            "position": [
+                2.316048,
+                -4.142658,
+                -0.001134
+            ]
+        }
+    ]
+}

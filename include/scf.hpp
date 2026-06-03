@@ -104,6 +104,89 @@ std::vector<double> update_damping(const std::vector<double>& new_matrix,
 }
 
 
+std::pair<bool, double> 
+rhf_final_check(double eps,
+                const std::vector<double>& overlap,
+                const std::vector<double>& P_new,
+                const std::vector<double>& H_core,
+                const std::vector<double>& ERI)
+{
+    std::vector<double> G_final = 
+                        repulsion_matrix(P_new, ERI);
+    std::vector<double> fock_check = 
+                        matrix_add(G_final, H_core);
+    std::vector<double> final_error = 
+                        error_matrix(P_new, fock_check, overlap);
+
+    double final_check = vector_norm(final_error);
+
+    bool accept_density = false;
+    double E_elec = energy(P_new, fock_check, H_core);;
+
+    if (final_check < eps){
+        accept_density = true;
+        std::cout << "" << std::endl;
+        std::cout << "final check passed" << std::endl;
+    } else{
+        std::cout << "" << std::endl;
+        std::cout << "final check failed, error: " <<
+                     final_check << std::endl;
+    }
+
+    return{accept_density, E_elec};
+}
+
+
+std::pair<bool, double> 
+uhf_final_check(double eps,
+                const std::vector<double>& overlap,
+                const std::vector<double>& Pa_new,
+                const std::vector<double>& Pb_new,
+                const std::vector<double>& H_core,
+                const std::vector<double>& ERI)
+{
+    std::vector<double> J_final = 
+                        coulomb_matrix(Pa_new, Pb_new, ERI);
+    std::vector<double> Ka_final = 
+                        exchange_matrix(Pa_new, ERI);
+    std::vector<double> Kb_final = 
+                        exchange_matrix(Pb_new, ERI);
+    std::vector<double> Fa_final = 
+                        fock_matrix_uhf(H_core, J_final, Ka_final);
+    std::vector<double> Fb_final = 
+                        fock_matrix_uhf(H_core, J_final, Kb_final);
+    std::vector<double> Ra_final = 
+                        error_matrix(Pa_new, Fa_final, overlap);
+    std::vector<double> Rb_final = 
+                        error_matrix(Pb_new, Fb_final, overlap);
+
+    double error_a = vector_norm(Ra_final);
+    double error_b = vector_norm(Rb_final);
+
+    double final_error = std::sqrt(error_a * error_a 
+                                   + error_b * error_b);
+
+    bool accept_density = false;
+    double E_ele = energy(Pa_new, Fa_final, H_core)
+                 + energy(Pb_new, Fb_final, H_core);
+
+    if (final_error < eps){
+        accept_density = true;
+        std::cout << "" << std::endl;
+        std::cout << "final check passed" << std::endl;
+
+    } else{
+        std::cout << "" << std::endl;
+        std::cout << "final check failed, error: " <<
+                      final_error << std::endl;
+    }
+
+    return {accept_density, E_ele};
+}
+
+
+
+
 std::string 
 formatTimeC20(std::chrono::high_resolution_clock::time_point tp) {
     // Cast high_resolution_clock to system_clock to get calendar time
@@ -120,17 +203,17 @@ formatTimeC20(std::chrono::high_resolution_clock::time_point tp) {
 
 
 rhf_data
-rhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
-           std::string basis_set,
-           std::string param_path,
-           int charge = 0,
-           std::string eri_device = "CPU", 
-           bool set_initial_density = false,
-           std::vector<double> P0 = {},
-           int max_it = 10000, 
-           double epsilon = 1e-6,
-           double damping = 0.3,
-           double screening_threshold = 1e-8)
+rhf_diis(const std::vector<std::pair<std::string, vector3>>& config,
+         std::string basis_set,
+         std::string param_path,
+         int charge = 0,
+         std::string eri_device = "CPU", 
+         bool set_initial_density = false,
+         std::vector<double> P0 = {},
+         int max_it = 10000, 
+         double epsilon = 1e-6,
+         double damping = 0.3,
+         double screening_threshold = 1e-8)
 {
     //start timing and initialize variables
     auto t0 = std::chrono::high_resolution_clock::now();                                                            
@@ -149,6 +232,8 @@ rhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
     std::vector<double> mo_energies;
     bool success = false;
     int n_it = 0;
+    int start_diis = 4;
+    int max_history = 8;
 
     //convert input configuration to basis set
     std::vector<atom> molecule(config.size());
@@ -184,10 +269,7 @@ rhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
         density_matrix = zero_vector;
     }
 
-
-
     std::vector<double> H_core = Hcore(molecule, basis);
-
 
     //compute other constants before the iterating process starts; 
     //nuclear repulsion energy, ERI tensor, overlap matrix and associated
@@ -219,19 +301,27 @@ rhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
     std::cout << "ERI calculation complete, time taken:  " << 
                  eri_time << " s" << std::endl;
 
+    std::deque<std::vector<double>> fock_history;
+    std::deque<std::vector<double>> error_history;
+
     for (int i=0; i<max_it; ++i){
 
         n_it += 1;
 
         //contract the ERI tensor with the density matrix to get a matrix.
         std::vector<double> G = repulsion_matrix(density_matrix, ERI);  
-        std::vector<double> fock_matrix(G.size());
+        std::vector<double> fock_matrix = matrix_add(H_core, G);
+         std::vector<double> error_vector = error_matrix(density_matrix, 
+                                                         fock_matrix, S);
+        // store the last 8 fock matrices
+        update_matrix_history(fock_matrix, fock_history, max_history);
+        update_matrix_history(error_vector, error_history, max_history);
 
-        //build the fock matrix
-        for (int j = 0; j < nbasis * nbasis; ++j){
-            fock_matrix[j] = H_core[j] + G[j];
+        // start DIIS from the fourth iteration
+        if (n_it >= start_diis){
+            fock_matrix = fock_diis(fock_history, error_history);
         }
-
+       
         //solve the eigenvalue problem and compute a new density matrix
         std::pair<std::vector<double>, std::vector<double>> 
         eigen_solution = EigProblem(fock_matrix, X);
@@ -242,52 +332,55 @@ rhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
                                                    n_electrons);
         
         //compute the squared difference with the old density matrix
-        double P_diff = 0.0;
-        for (int j=0; j<P_new.size(); ++j){
-
-            P_diff += (density_matrix[j] - P_new[j]) *
-                      (density_matrix[j] - P_new[j]);
-        }
+        double P_diff = RMSD(P_new, density_matrix);
+        double error_norm = vector_norm(error_vector);
         
         // check the RMSD, if it's small enough then the density matrix 
         // has converged and the process is terminated.
-        if (std::sqrt(P_diff/P_new.size()) < epsilon){
+        if (P_diff < epsilon && error_norm < epsilon){
 
-            success = true;
-            density_matrix = P_new;
-            E_ele = energy(density_matrix, fock_matrix, H_core);
-            E_tot = E_ele + E_nuc;
+            std::pair<bool, double> check_result =
+            rhf_final_check(epsilon, S, P_new, H_core, ERI);
 
-            std::cout << "" <<std::endl;
-            std::cout << "Convergence criterion met after " << n_it << 
+            if (check_result.first){
+                success = true;
+                density_matrix = P_new;
+                E_ele = check_result.second;
+                E_tot = E_nuc + E_ele;
+                std::cout << "" <<std::endl;
+                std::cout << "Convergence criterion met after " << n_it << 
                           " iterations, energy value: " << 
                           E_tot << " Hartrees." << std::endl;
-            break;
+                break;
+            } 
         }
-
-        //keeping track of the time taken
-        auto ti = std::chrono::high_resolution_clock::now();
-        double loop_time = std::chrono::duration<double>(ti - t2).count();
-        std::cout << "\rCycle " << n_it << ":" 
-        << loop_time << " s       " << std::flush;
 
         // if the density matrix hasn't converged,
         // update it with damping and start a new iteration.
-        for (int j = 0; j < density_matrix.size(); ++j){
-
-            density_matrix[j] = damping * P_new[j] +
-                                (1.0 - damping) * density_matrix[j];
+        if (n_it >= start_diis){
+            density_matrix = P_new;
+        } else{
+            density_matrix = update_damping(P_new, density_matrix, damping);
         }
 
 
         if (i == max_it - 1){
 
-            std::cout << "" <<std::endl;
-            std::cout << "Failed to achieve convergence, "
-                      << "RMSD of density matrix elements "
-                      << std::sqrt(P_diff/P_new.size()) << std::endl;
+            std::pair<bool, double> check_result =
+            rhf_final_check(epsilon, S, density_matrix, H_core, ERI);
 
+            E_ele = check_result.second;
+            E_tot = E_nuc + E_ele;
+            std::cout << "" << std::endl;
+            std::cout << "last iteration reached" << std::endl;
         }
+
+        //keeping track of the time taken
+        auto ti = std::chrono::high_resolution_clock::now();
+        double loop_time = std::chrono::duration<double>(ti - t2).count();
+        std::cout << "" << std::endl;
+        std::cout << "\rCycle " << n_it << ":" 
+        << loop_time << " s       " << std::flush;
     }
 
     auto t3 = std::chrono::high_resolution_clock::now();
@@ -318,6 +411,7 @@ rhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
     output.hardware = eri_device;
     output.BasisSet = basis_set;
     
+    std::cout << "" << std::endl;
     std::cout << "SCF cycle completed, total time taken:  " <<
                  total_time << " s" << std::endl;
 
@@ -325,8 +419,9 @@ rhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
 }
 
 
+
 uhf_data
-uhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
+uhf_diis(const std::vector<std::pair<std::string, vector3>>& config,
           std::string basis_set,
           std::string param_path,
           std::pair<int, int> spin_occ,
@@ -359,6 +454,8 @@ uhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
     std::vector<double> Eb;
     bool success = false;
     int n_it = 0;
+    int max_hist = 8;
+    int start_diis = 4;
 
     //convert input configuration to basis set
     std::vector<atom> molecule(config.size());
@@ -434,6 +531,9 @@ uhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
     std::cout << "ERI calculation complete, time taken:  " << 
                  eri_time << " s" << std::endl;
 
+    std::deque<std::vector<double>> fock_hist;
+    std::deque<std::vector<double>> error_hist;
+
     for (int i=0; i<max_it; ++i){
 
         n_it += 1;
@@ -446,6 +546,28 @@ uhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
         // build the fock matrices
         std::vector<double> Fa = fock_matrix_uhf(H_core, J, Ka);
         std::vector<double> Fb = fock_matrix_uhf(H_core, J, Kb);
+
+        std::vector<double> Ra = error_matrix(Pa, Fa, S);
+        std::vector<double> Rb = error_matrix(Pb, Fb, S);
+
+        std::vector<double> total_fock = Fa;
+        std::vector<double> error_vector = Ra;
+        total_fock.insert(total_fock.end(), Fb.begin(), Fb.end());
+        error_vector.insert(error_vector.end(), Rb.begin(), Rb.end());
+
+        update_matrix_history(total_fock, fock_hist, max_hist);
+        update_matrix_history(error_vector, error_hist, max_hist);
+
+        if (n_it >= start_diis){
+
+            std::vector<double> F_diis = fock_diis(fock_hist, error_hist);
+
+            Fa = std::vector<double>(F_diis.begin(), F_diis.begin()
+                                     + nbasis * nbasis);
+            
+            Fb = std::vector<double>(F_diis.begin() + nbasis * nbasis,
+                                     F_diis.end());
+        }
 
         // solve the eigenvalue problem and compute a new density matrix
         std::pair<std::vector<double>, std::vector<double>> 
@@ -464,39 +586,52 @@ uhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
         // compute the squared difference with the old density matrix
         double diff_a = RMSD(Pa, Pa_new);
         double diff_b = RMSD(Pb, Pb_new);
+        double error_norm = vector_norm(error_vector);
         
         // check the RMSD, if it's small enough then the density matrix 
         // has converged and the process is terminated.
-        if (diff_a < epsilon && diff_b < epsilon){
+        if (diff_a < epsilon && diff_b < epsilon && error_norm < epsilon){
 
-            success = true;
-            Pa = Pa_new;
-            Pb = Pb_new;
-            E_ele = energy(Pa, Fa, H_core) 
-                    + energy(Pb, Fb, H_core);
+            std::pair<bool, double> check_result = 
+            uhf_final_check(epsilon, S, Pa_new, Pb_new, H_core, ERI);
 
-            E_tot = E_ele + E_nuc;
-            std::cout << "" <<std::endl;
-            std::cout << "Convergence criterion met after " << n_it << 
-                          " iterations, energy value: " << 
-                          E_tot << " Hartrees." << std::endl;
-            break;
+            if (check_result.first){
+                success = true;
+                E_ele = check_result.second;
+                Pa = Pa_new;
+                Pb = Pb_new;
+                E_tot = E_nuc + E_ele;
+
+                std::cout << "" << std::endl;
+                std::cout << "Density converged after " <<
+                          n_it << " iterations, total system energy: " <<
+                          E_tot << " Hartrees.";
+                break;
+            }
         }
 
-
-        if (i == max_it - 1){
-
-            std::cout << "" <<std::endl;
-            std::cout << "Failed to achieve convergence, "
-                      << "RMSD of density matrix elements: "
-                      << diff_a << ", " << diff_b << std::endl;
-
-        }
 
         // if the density matrix hasn't converged,
         // update it with damping and start a new iteration.
-        Pa = update_damping(Pa_new, Pa, damping);
-        Pb = update_damping(Pb_new, Pb, damping);
+        if (n_it >= start_diis){
+            Pa = Pa_new;
+            Pb = Pb_new;
+        } else{
+            Pa = update_damping(Pa_new, Pa, damping);
+            Pb = update_damping(Pb_new, Pb, damping);
+        }
+
+        if (i == max_it - 1){
+
+            std::pair<bool, double> check_result =
+            uhf_final_check(epsilon, S, Pa, Pb, H_core, ERI);
+
+            E_ele = check_result.second;
+            E_tot = E_nuc + E_ele;
+            std::cout << "" << std::endl;
+            std::cout << "last iteration reached" << std::endl;
+
+        }
 
         //keeping track of the time taken
         auto ti = std::chrono::high_resolution_clock::now();
@@ -539,6 +674,7 @@ uhf_solver(const std::vector<std::pair<std::string, vector3>>& config,
     output.hardware = eri_device;
     output.BasisSet = basis_set;
     
+    std::cout << "" << std::endl;
     std::cout << "SCF cycle completed, total time taken:  " <<
                  total_time << " s" << std::endl;
 

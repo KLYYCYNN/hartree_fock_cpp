@@ -1,7 +1,7 @@
 {
     "basis_path": "/home/jc6224/hf_cpp/basis",
     "save_path": "/home/jc6224/hf_cpp/data/common_molecules",
-    "folder_name": "G-T-Cl2(1)",
+    "folder_name": "G-T-Cl2(2)",
     "basis": "cc-pVTZ",
     "charge": 0,
     "eri_hardware": "GPU",
