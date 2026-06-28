@@ -179,7 +179,7 @@ The resulting executable will use the CPU implementation exclusively.
 I implemented two important optimizations to speed up the evaluation of two-electron integrals. The first is symmetry exploitation. A two-electron integral
 
 $$
-\int \int  \frac{\chi_\mu(\mathbf{r}_1)\chi_\nu(\mathbf{r}_1)\chi_\lambda(\mathbf{r}_2)\chi_\sigma(\mathbf{r}_2)}{|\mathbf{r}_1 - \mathbf{r}_2|} \; d^3\mathbf{r}_1 \, d^3\mathbf{r}_2 = (\mu\nu|\lambda\sigma)
+\int \int  \frac{\chi_\mu(\mathbf{r}_1)\chi_\nu(\mathbf{r}_1)\chi_\lambda(\mathbf{r}_2)\chi_\sigma(\mathbf{r}_2)}{|\mathbf{r}_1 - \mathbf{r}_2|} d^3\mathbf{r}_1 d^3\mathbf{r}_2 = (\mu\nu|\lambda\sigma)
 $$
 
 where $\chi_i$ are basis functions. Using the commutative property of multiplication inside the integrand, we can find that
@@ -213,8 +213,9 @@ $$
 $$
 
 A two-electron integral 
+
 $$
-\int \int  \frac{\chi_\mu(\mathbf{r}_1)\chi_\nu(\mathbf{r}_1)\chi_\lambda(\mathbf{r}_2)\chi_\sigma(\mathbf{r}_2)}{|\mathbf{r}_1 - \mathbf{r}_2|} \; d^3\mathbf{r}_1 \, d^3\mathbf{r}_2  = \int \int \; \frac{\chi_\mu(\mathbf{r}_1)\chi_\lambda(\mathbf{r}_2)}{\sqrt{|\mathbf{r}_1 - \mathbf{r}_2|}} \; \frac{\chi_\nu(\mathbf{r}_1)\chi_\sigma(\mathbf{r}_2)}{\sqrt{|\mathbf{r}_1 - \mathbf{r}_2|}}d^3\mathbf{r}_1 \, d^3\mathbf{r}_2
+\int \int  \frac{\chi_\mu(\mathbf{r}_1)\chi_\nu(\mathbf{r}_1)\chi_\lambda(\mathbf{r}_2)\chi_\sigma(\mathbf{r}_2)}{|\mathbf{r}_1 - \mathbf{r}_2|}  d^3\mathbf{r}_1  d^3\mathbf{r}_2  = \int \int  \frac{\chi_\mu(\mathbf{r}_1)\chi_\lambda(\mathbf{r}_2)}{\sqrt{|\mathbf{r}_1 - \mathbf{r}_2|}} \frac{\chi_\nu(\mathbf{r}_1)\chi_\sigma(\mathbf{r}_2)}{\sqrt{|\mathbf{r}_1 - \mathbf{r}_2|}}d^3\mathbf{r}_1  d^3\mathbf{r}_2
 $$
 
 $$
