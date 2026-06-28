@@ -261,13 +261,13 @@ $$
 B_{ij} = R_i \cdot R_j,
 $$
 
-and the coefficients are obtained with the constraint
+and the coefficients have contraint
 
 $$
 \sum_i c_i = 1.
 $$
 
-The coefficients $c$ are obtained by solving a matrix equation involving the augemented pulay matrix.
+The coefficients $c$ are obtained by solving a matrix equation involving the augemented pulay matrix while enforcing the constraint.
 
 For UHF, the alpha and beta Fock matrices and error vectors are combined so that one shared set of DIIS coefficients is used for both spin channels.
 
