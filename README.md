@@ -267,26 +267,7 @@ $$
 \sum_i c_i = 1.
 $$
 
-The coefficients $c$ are obtained by solving the augmented Pulay system
-
-$$
-\begin{pmatrix}
-B & -1 \\
-1^T & 0
-\end{pmatrix}
-\begin{pmatrix}
-c \\
-\lambda
-\end{pmatrix}
-=
-\begin{pmatrix}
-0 \\
-1
-\end{pmatrix},
-$$
-
-where $B_{ij}=R_i\cdot R_j$ and the last row enforces $\sum_i c_i=1$.
-
+The coefficients $c$ are obtained by solving a matrix equation involving the augemented pulay matrix.
 
 For UHF, the alpha and beta Fock matrices and error vectors are combined so that one shared set of DIIS coefficients is used for both spin channels.
 
